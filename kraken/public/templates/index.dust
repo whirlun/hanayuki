@@ -1,0 +1,50 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    {>"./layouts/master" /}
+
+</head>
+<body>
+{<bodyContent}
+<div class="row index-btn-group">
+    <button type="button" class="btn btn-success btn-lg">发帖</button>
+    <button type="button" class="btn btn-outline-info">最新</button>
+    <button type="button" class="btn btn-outline-info">最热</button>
+    <button type="button" class="btn btn-outline-info">倒序</button>
+</div>
+
+<div class="sidebar">
+    <ul class="list-group">
+        {#cats}
+        <li class="list-group-item"><i style="color:{color}" class="icon icon-controller-stop" aria-hidden="true"></i><p></p></li>
+        {/cats}
+    </ul>
+</div>
+<div class="threads">
+<table class="table index-table">
+    <thead>
+    <tr>
+        <th>主题</th>
+        <th>分类</th>
+        <th>浏览/回复</th>
+        <th>发帖人</th>
+        <th>最后回帖时间</th>
+    </tr>
+    </thead>
+<tbody>
+    {#threads}
+    <tr>
+<td><a href="{tid}">{title}</a></td>
+    <td>{category}</td>
+    <td>{read}/{reply}</td>
+    <td>{username}</td>
+    <td>{time}</td>
+</tr>
+{/threads}
+</tbody>
+</table>
+
+</div>
+    {/bodyContent}
+
+</body>
+</html>
