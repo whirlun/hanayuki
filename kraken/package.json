@@ -18,7 +18,8 @@
     "eslint": "^1.10.3",
     "express": "^4.12.2",
     "kraken-js": "^2.0.0",
-    "makara": "^2.0.3"
+    "makara": "^2.0.3",
+    "socket.io": "^2.0.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
