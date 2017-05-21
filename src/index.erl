@@ -31,6 +31,7 @@
 start_link() ->
 	gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
+
 %%---------------------------------------------------------------------
 %%@doc give nodejs data to render
 %%@spec render_index(Index:: integer(), Offset:: integer) -> {ok, sent}
@@ -51,7 +52,9 @@ init([]) ->
 
 handle_call({render, Index, Offset},_From, State) ->
 	Data = ha_mnesia:lookup_thread(Index, Offset),
-	{reply, State#state{data = Data}, State}.
+	{data, Result} = Data,
+	EJson = jsonify(Result, []),
+	{reply, State#state{data = EJson}, State}.
 
 handle_cast(stop, State) ->
 	{stop, normal, State}.
@@ -65,3 +68,14 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
+%%%====================================================================
+%%% Internal functions
+%%%====================================================================
+
+jsonify([], Result) ->
+	EJson = {[{thread, Result}]},
+	EJson;
+jsonify([H|T], Result) ->
+	{A,B,C,D,E,F,G,I,J} = H,
+	H1 = {[{title, A}, {read, B}, {reply, C}, {uid, D}, {category,E}, {time, F}, {loves, G}, {lock, I}, {accesslevel, J}]},
+	jsonify(T, [H1| Result]).
