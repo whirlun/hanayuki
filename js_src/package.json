@@ -1,0 +1,28 @@
+{
+  "name": "hanayuki",
+  "version": "0.0.1",
+  "description": "the frontend of hanayuki",
+  "main": "hanayuki.js",
+  "dependencies": {
+    "consolidate": "^0.14.5",
+    "dustjs-linkedin": "^2.7.5",
+    "express": "^4.15.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kafuuchino/hanayuki.git"
+  },
+  "keywords": [
+    "hanayuki"
+  ],
+  "author": "kafuuchino",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kafuuchino/hanayuki/issues"
+  },
+  "homepage": "https://github.com/kafuuchino/hanayuki#readme"
+}

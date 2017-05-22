@@ -73,9 +73,9 @@ code_change(_OldVsn, State, _Extra) ->
 %%%====================================================================
 
 jsonify([], Result) ->
-	EJson = {[{thread, Result}]},
+	EJson = {[{threads, Result}]},
 	EJson;
 jsonify([H|T], Result) ->
 	{A,B,C,D,E,F,G,I,J} = H,
-	H1 = {[{title, A}, {read, B}, {reply, C}, {uid, D}, {category,E}, {time, F}, {loves, G}, {lock, I}, {accesslevel, J}]},
+	H1 = {[{title, A}, {read, B}, {reply, C}, {username, D}, {category,E}, {time, F}, {loves, G}, {lock, I}, {accesslevel, J}]},
 	jsonify(T, [H1| Result]).

@@ -12,9 +12,18 @@ a:after{
     text-decoration: none;
     color: gray;
 }
+
+.index-nav {
+    float:right;
+}
+
 .index-btn-group {
     margin-top:30px;
     align-items: center;
+}
+
+.navbar-nav {
+    margin-left:400px;
 }
 
 .index-btn-group > button {
