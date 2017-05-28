@@ -72,7 +72,6 @@ do_rpc(Socket, RawData, State) ->
         Result = apply(list_to_atom(binary_to_list(M)), list_to_atom(binary_to_list(F)), args_to_terms(A, [])),
         {ok, {state, Data}} = Result,
         Jsonify = jiffy:encode(Data, [uescape, force_utf8]),
-        io:format(binary_to_list(Jsonify)),
         gen_tcp:send(Socket, io_lib:fwrite("~p~n", [binary_to_list(Jsonify)])),
     State.
 
