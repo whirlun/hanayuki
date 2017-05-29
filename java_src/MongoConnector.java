@@ -26,22 +26,22 @@ public class MongoConnector {
 
     public void insert(String setname,OtpErlangList keys,OtpErlangList values) throws Exception{
         Document document = new Document();
-        for(OtpErlangObject key:keys){
-            for(OtpErlangObject value:values){
-                document.append((String)convert2Java(key), convert2Java(value));
+        for(int i = 0; i <keys.arity(); i++){
+            OtpErlangObject key = keys.elementAt(i);
+            OtpErlangObject value = values.elementAt(i);
+            document.append((String)convert2Java(key), convert2Java(value));
             }
-        }
         MongoCollection<Document> collection = mdb.getCollection(setname);
         collection.insertOne(document);
     }
 
     public void remove(String setname,OtpErlangList keys,OtpErlangList values) throws Exception{
-        for (OtpErlangObject key:keys) {
-            for (OtpErlangObject value:values){
-                MongoCollection<Document> collection = mdb.getCollection(setname);
+        MongoCollection<Document> collection = mdb.getCollection(setname);
+        for(int i = 0; i <keys.arity(); i++){
+            OtpErlangObject key = keys.elementAt(i);
+            OtpErlangObject value = values.elementAt(i);
                 collection.deleteMany(Filters.eq((String)convert2Java(key), convert2Java(value)));
             }
-        }
     }
 
     public List<Document> find(String setname,OtpErlangList keys, OtpErlangList values) throws Exception {

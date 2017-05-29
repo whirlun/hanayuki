@@ -6,3 +6,4 @@
 
 -module(ha_database).
 
+-export([insert/3, remove/3, ])

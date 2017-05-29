@@ -22,7 +22,7 @@ public class MongoNode {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 3) {
-            System.out.println("wrong number of arguments");
+           System.out.println("wrong number of arguments");
             return;
         }
         MongoNode main = new MongoNode(args[0],args[1], args[2]);

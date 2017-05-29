@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ericsson.otp.erlang.*;
+import org.bson.AbstractBsonReader.State;
 import org.bson.*;
 import org.bson.json.JsonReader;
 
@@ -154,43 +155,56 @@ public class MongoTask implements Runnable {
         return new OtpErlangList(erlangArray);
     }
     private OtpErlangTuple java2Erlang(Document javaTerm) {
-        BsonReader reader = new JsonReader(javaTerm.toJson());
+        AbstractBsonReader reader = new JsonReader(javaTerm.toJson());
         ArrayList<OtpErlangObject> arrayList = new ArrayList<>();
         reader.readStartDocument();
-        while(reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            String fieldName = reader.readName();
-            arrayList.add(new OtpErlangAtom(fieldName));
-            switch (reader.getCurrentBsonType()) {
-                case INT32:
-                    arrayList.add(new OtpErlangInt(reader.readInt32()));
-                    break;
-                case INT64:
-                    arrayList.add(new OtpErlangLong(reader.readInt64()));
-                    break;
-                case STRING:
-                    arrayList.add(new OtpErlangString(reader.readString()));
-                    break;
-                case DOUBLE:
-                    arrayList.add(new OtpErlangDouble(reader.readDouble()));
-                    break;
-                case BOOLEAN:
-                    arrayList.add(new OtpErlangBoolean(reader.readBoolean()));
-                    break;
-                case OBJECT_ID:
-                    arrayList.add(new OtpErlangString(reader.readObjectId().toHexString()));
-                    break;
-                case TIMESTAMP:
-                    arrayList.add(new OtpErlangInt(reader.readTimestamp().getTime()));
-                    break;
-                case UNDEFINED:
-                    arrayList.add(new OtpErlangAtom("nil"));
-                    break;
-                case ARRAY:
-                    arrayList.add(java2Erlang((BsonArray)javaTerm.get(fieldName)));
-                    break;
+        Boolean breakFlag = false;
+        while(true) {
+            while (reader.getState() == State.TYPE && reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                String fieldName = reader.readName();
+                arrayList.add(new OtpErlangAtom(fieldName));
+                switch (reader.getCurrentBsonType()) {
+                    case INT32:
+                        arrayList.add(new OtpErlangInt(reader.readInt32()));
+                        break;
+                    case INT64:
+                        arrayList.add(new OtpErlangLong(reader.readInt64()));
+                        break;
+                    case STRING:
+                        arrayList.add(new OtpErlangString(reader.readString()));
+                        break;
+                    case DOUBLE:
+                        arrayList.add(new OtpErlangDouble(reader.readDouble()));
+                        break;
+                    case BOOLEAN:
+                        arrayList.add(new OtpErlangBoolean(reader.readBoolean()));
+                        break;
+                    case OBJECT_ID:
+                        arrayList.add(new OtpErlangString(reader.readObjectId().toHexString()));
+                        break;
+                    case TIMESTAMP:
+                        arrayList.add(new OtpErlangInt(reader.readTimestamp().getTime()));
+                        break;
+                    case UNDEFINED:
+                        arrayList.add(new OtpErlangAtom("nil"));
+                        break;
+                    case ARRAY:
+                        arrayList.add(java2Erlang((BsonArray) javaTerm.get(fieldName)));
+                        break;
+                    case DOCUMENT:
+                        arrayList.add(java2Erlang((Document) javaTerm.get(fieldName)));
                 }
+            }
+
+            if (reader.getState() == State.VALUE) {
+                   reader.skipValue();
+            }
+            else {
+                    reader.readEndDocument();
+                    break;
+            }
         }
-        reader.readEndDocument();
+        
          OtpErlangObject[] resultArray = new OtpErlangObject[arrayList.size()];
         arrayList.toArray(resultArray);
         return new OtpErlangTuple(resultArray);
