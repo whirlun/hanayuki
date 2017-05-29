@@ -66,7 +66,7 @@ public class MongoConnector {
     public void update(String setname,OtpErlangList keys,OtpErlangList values) throws Exception {
         MongoCollection<Document> collection = mdb.getCollection(setname);
         collection.updateMany(Filters.eq((String)convert2Java(keys.getHead()), convert2Java(values.getHead())), 
-        new Document("$set", new Document((String)convert2Java(keys.getTail()), convert2Java(values.getTail()))));
+        new Document("$set", new Document((String)convert2Java(keys.elementAt(1)), convert2Java(values.elementAt(1)))));
     }
 
     private enum OtpTypes {
