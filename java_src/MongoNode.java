@@ -41,13 +41,19 @@ public class MongoNode {
             String setname = ((OtpErlangAtom)t.elementAt(3)).atomValue();
             OtpErlangList keys = ((OtpErlangList)t.elementAt(4));
             OtpErlangList values;
+            OtpErlangString operation;
             MongoTask task = null;
-            if(t.arity() == 6) {
+            if(t.arity() == 7) {
                 values = ((OtpErlangList)t.elementAt(5));  
-                task = new MongoTask(mbox, conn, from, ref, setname, action, keys, values);
+                operation = ((OtpErlangString)t.elementAt(6));
+                task = new MongoTask(mbox, conn, from, ref, setname, action, keys, values, operation);
+            }
+            else if(t.arity() == 6) {
+                values = ((OtpErlangList)t.elementAt(5));
+                task = new MongoTask(mbox, conn, from,ref, setname, action, keys, values, null);
             }
             else if(t.arity() == 5) {
-                task = new MongoTask(mbox, conn, from,ref, setname, action, keys, null);
+                task = new MongoTask(mbox, conn, from, ref, setname, action, keys, null, null);
             }
             else {
                 System.out.println("invalid request" + t);
@@ -56,6 +62,7 @@ public class MongoNode {
             exec.submit(task);
         } catch(Exception e) {
         System.out.println("Unexpected: " + e);
+        e.printStackTrace();
         }
     }
 }

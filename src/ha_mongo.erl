@@ -6,4 +6,53 @@
 
 -module(ha_mongo).
 
--export([insert/2, remove/2, update/2, find/2]).
+-export([insert/4, remove/4, update/5, find/4]).
+
+insert(Node, Setname, Keys, Values) ->
+    Ref = make_ref(),  
+    {mongo_server, Node} ! {insert, self(), Ref,Setname, Keys, Values},
+    receive
+        {reply, ok, Ref} ->
+        ok;
+        {reply, error, Ref} ->
+        {error, internalerror}
+    after 3000 ->
+        {error, timeout}
+    end.
+
+remove(Node, Setname, Keys, Values) ->
+    Ref = make_ref(),
+    {mongo_server, Node} ! {remove, self(), Ref, Setname, Keys, Values},
+    receive
+        {reply, ok, Ref} ->
+        ok;
+        {reply, error, Ref} ->
+            {error, internalerror}
+    after 3000 ->
+        {error, timeout}
+    end.
+
+find(Node, Setname, Keys, Values) ->
+    Ref = make_ref(),
+    {mongo_server, Node} ! {find, self(), Ref, Setname, Keys, Values},
+    receive
+        {reply, ok, Result, Ref} ->
+        {ok, Result};
+        {reply, error, Ref} ->
+            {error, internalerror}
+    after 3000 ->
+        {error, timeout}
+    end.
+
+update(Node, Setname, Keys, Values, Operation) ->
+    Ref = make_ref(),
+    {mongo_server, Node} ! {update, self(), Ref, Setname, Keys, Values, Operation},
+    receive
+        {reply, ok, Ref} ->
+        ok;
+        {reply, error, Ref} ->
+            {error, internalerror}
+    after 3000 ->
+        {error, timeout}
+    end.
+

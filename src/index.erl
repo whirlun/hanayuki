@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, render_index/2]).
+-export ([start_link/0, render_index/2, add_thread/4]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -40,7 +40,18 @@ start_link() ->
 
 render_index(Index, Offset) ->
 	Reply = gen_server:call(?SERVER, {render, Index, Offset}),
+{ok, Reply}.
+
+%%---------------------------------------------------------------------
+%%@doc give nodejs data to render
+%%@spec render_index(Index:: integer(), Offset:: integer) -> {ok, sent}
+%%@End
+%%---------------------------------------------------------------------
+
+add_thread(Title, Content, Uid, Category) ->
+	Reply = gen_server:call(?SERVER, {addthread, Title, Content, Uid, Category}),
 	{ok, Reply}.
+
 
 %%%====================================================================
 %%% callbacks
@@ -51,10 +62,19 @@ init([]) ->
 	
 
 handle_call({render, Index, Offset},_From, State) ->
-	Data = ha_mnesia:lookup_thread(Index, Offset),
+	Data = ha_database:latest_thread(Index, Offset),
 	{data, Result} = Data,
 	EJson = jsonify(Result, []),
-	{reply, State#state{data = EJson}, State}.
+	{reply, State#state{data = EJson}, State};
+handle_call({addthread, Title, Content, Uid, Category}, _From, State) ->
+	Result = ha_database:insert('test', [tid, title, content, read, reply, uid, category, rtotal, time, loves, lock, accesslevel],
+	[1, Title, Content, 0, 0, Uid, Category, rtotal, time, loves, lock, accesslevel]),
+	case Result of
+		ok ->
+		{reply, State#state{data=ok}, State};
+		{error, _}->
+		{reply, State#state{data=error}, State}
+	end.
 
 handle_cast(stop, State) ->
 	{stop, normal, State}.

@@ -3,6 +3,7 @@ settings.json
 deps
 *.o
 *.beam
+*.erlx
 *.plt
 erl_crash.dump
 ebin

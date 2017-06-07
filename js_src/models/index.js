@@ -17,5 +17,17 @@ module.exports = local = {
 		let request = {"module": "index", "function": "render_index", "arg": [index, offset]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
-	}
+	},
+
+	addThread: function(title, content, uid, category, callback) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) => {
+			let reply = "" + data;
+			callback(reply);
+			client.end();
+		})
+		let request = {"module": "index", "function": "add_thread", "arg": [title, content, uid, category]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);
+	} 
 }

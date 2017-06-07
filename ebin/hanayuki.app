@@ -8,7 +8,9 @@
              index_sup,
              index,
              sc_server,
-             sc_sup
+             sc_sup,
+             ha_database,
+             ha_mongo
             ]},
   {registered, [ha_app]},
   {applications, [kernel, stdlib]},

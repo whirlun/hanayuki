@@ -10,3 +10,12 @@ exports.index = (req, res) => {
 	}
 		)
 }
+
+exports.add = (req, res) => {
+	Index.addThread("test", "testtesttesttesttest", 0, 0, (model) =>
+	{
+		let stringed = JSON.parse(model);
+		let viewModel = JSON.parse(stringed);
+		res.send(viewModel);
+	})
+}

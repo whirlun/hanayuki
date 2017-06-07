@@ -15,9 +15,9 @@ public class MongoTask implements Runnable {
     private String setname;
     private OtpErlangList keys;
     private OtpErlangList values;
-
+    private OtpErlangString operation;
     public MongoTask(OtpMbox mbox, MongoConnector conn, OtpErlangPid from, OtpErlangRef ref, String setname, String action, 
-    OtpErlangList keys, OtpErlangList values) {
+    OtpErlangList keys, OtpErlangList values, OtpErlangString operation) {
         super();
         this.mbox = mbox;
         this.conn = conn;
@@ -27,6 +27,7 @@ public class MongoTask implements Runnable {
         this.setname = setname;
         this.keys = keys;
         this.values = values;
+        this.operation = operation;
     }
 
     private enum actions {
@@ -51,10 +52,11 @@ public class MongoTask implements Runnable {
             break;
         }}catch (Exception e){
                 OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
-                new OtpErlangAtom("error")
+                new OtpErlangAtom("reply"), new OtpErlangAtom("error"), ref
                 });
                 mbox.send(from, reply);
                 System.out.println("caught error: " + e);
+                e.printStackTrace();
             }
         }
     
@@ -85,13 +87,13 @@ public class MongoTask implements Runnable {
         OtpErlangObject[] erlangArray = new OtpErlangObject[arrayList.size()];
         arrayList.toArray(erlangArray);
         OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
-            new OtpErlangAtom("reply"), new OtpErlangTuple(erlangArray), ref
+            new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), new OtpErlangTuple(erlangArray), ref
         });
         mbox.send(from, reply);
     }
 
     private void doUpdate() throws Exception {
-        conn.update(setname, keys, values);
+        conn.update(setname, keys, values, operation);
         OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
             new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), ref
         });
