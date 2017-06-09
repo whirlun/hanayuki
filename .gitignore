@@ -14,4 +14,5 @@ rel/example_project
 test
 javaconfig.json
 com
+npm-debug.log
 launch.json

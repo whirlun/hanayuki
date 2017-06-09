@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, render_index/2, add_thread/4]).
+-export ([start_link/0, render_index/2, add_thread/5]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -48,8 +48,8 @@ render_index(Index, Offset) ->
 %%@End
 %%---------------------------------------------------------------------
 
-add_thread(Title, Content, Uid, Category) ->
-	Reply = gen_server:call(?SERVER, {addthread, Title, Content, Uid, Category}),
+add_thread(Title, Content, Username, Category, Accesslevel) ->
+	Reply = gen_server:call(?SERVER, {addthread, Title, Content, Username, Category, Accesslevel}),
 	{ok, Reply}.
 
 
@@ -62,13 +62,13 @@ init([]) ->
 	
 
 handle_call({render, Index, Offset},_From, State) ->
-	Data = ha_database:latest_thread(Index, Offset),
-	{data, Result} = Data,
+	Result = ha_database:latest_thread(Index, Offset),
 	EJson = jsonify(Result, []),
 	{reply, State#state{data = EJson}, State};
-handle_call({addthread, Title, Content, Uid, Category}, _From, State) ->
-	Result = ha_database:insert('test', [tid, title, content, read, reply, uid, category, rtotal, time, loves, lock, accesslevel],
-	[1, Title, Content, 0, 0, Uid, Category, rtotal, time, loves, lock, accesslevel]),
+handle_call({addthread, Title, Content, Username, Category, Accesslevel}, _From, State) ->
+	{M, S, _} = os:timestamp(),
+	Result = ha_database:insert('thread', [title, content, read, reply, username, category, rtotal, time, loves, lock, accesslevel],
+	[Title, Content, 0, [], Username, Category, 0, 1000000*M+S, 0, false, Accesslevel]),
 	case Result of
 		ok ->
 		{reply, State#state{data=ok}, State};
@@ -96,6 +96,8 @@ jsonify([], Result) ->
 	EJson = {[{threads, Result}]},
 	EJson;
 jsonify([H|T], Result) ->
-	{A,B,C,D,E,F,G,I,J} = H,
-	H1 = {[{title, A}, {read, B}, {reply, C}, {username, D}, {category,E}, {time, F}, {loves, G}, {lock, I}, {accesslevel, J}]},
+	{'_id',_,title,Title,content,_,read,Read,reply,_,username, Username, 
+	category, Category, rtotal, Rtotal, time, Time, loves, 
+	Loves, lock, Lock, accesslevel,Accesslevel} = H,
+	H1 = {[{title, list_to_binary(Title)}, {read, Read}, {reply, Rtotal}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {time, Time}, {loves, Loves}, {lock, Lock}, {accesslevel, Accesslevel}]},
 	jsonify(T, [H1| Result]).

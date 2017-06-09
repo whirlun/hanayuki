@@ -6,7 +6,6 @@
 -define(DEFAULT_NODE, 'javaNode@BBrabbit-surface').
 
 insert(Setname, Keys, Values) ->
-    ha_mnesia:insert_thread(Values),
     Result = ha_mongo:insert(?DEFAULT_NODE, Setname, Keys, Values),
     Result.
 
@@ -15,13 +14,19 @@ remove(Setname, Keys, Values) ->
     Result.
 
 find(Setname, Keys, Values) ->
-    {ok, Result} = ha_mongo:find(?DEFAULT_NODE, Setname, Keys, Values),
-    Result.
+    {Status, Result} = ha_mongo:find(?DEFAULT_NODE, Setname, Keys, Values),
+    case Status of 
+    error -> {error, Result};
+    ok -> Result
+    end.
 
 update(Setname, Keys, Values, Operation) ->
-    Result = ha_mongo:update(Setname, Keys, Values, Operation),
+    Result = ha_mongo:update(?DEFAULT_NODE, Setname, Keys, Values, Operation),
     Result.
 
 latest_thread(Index, Offset) ->
-    {data, Data} = ha_mnesia:lookup_latestThread(Index, Offset),
-    Data.
+    {Status, Result} = ha_mongo:latest_thread(?DEFAULT_NODE, thread, [], [Index, Offset, a]),
+    case Status of 
+    error -> {error, Result};
+    ok -> Result
+    end.

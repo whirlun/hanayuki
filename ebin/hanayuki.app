@@ -3,7 +3,6 @@
   {vsn, "0.0.1"},
   {modules, [
              ha_app,
-             ha_mnesia,
              ha_sup,
              index_sup,
              index,

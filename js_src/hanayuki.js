@@ -2,6 +2,9 @@ var express = require('express');
 var http = require('http');
 var app = express();
 var dust = require('dustjs-linkedin');
+require('dustjs-helpers');
+require('moment');
+require('dustjs-helper-formatdate');
 var cons = require('consolidate');
 
 app.set('port', process.env.PORT || 3000);

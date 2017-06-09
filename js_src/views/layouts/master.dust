@@ -9,6 +9,7 @@
     <meta name="author" content="">
 
      <link href="css/main.css" rel="stylesheet">
+     <script src="https://cdn.bootcss.com/moment.js/2.2.1/moment+langs.min.js"></script>
      <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
  <style>
       /* note: this is a hack for ios iframe for bootstrap themes shopify page */

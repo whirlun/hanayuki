@@ -1,8 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
     {>"./layouts/master" /}
-
-</head>
 <body>
 {<bodyContent}
 <div class="row index-btn-group">
@@ -12,14 +10,15 @@
     <button type="button" class="btn btn-info">倒序</button>
 </div>
 
-<div class="sidebar">
+<div class="row">
+<div class="sidebar col-md-1">
     <ul class="list-group">
         {#cats}
         <li class="list-group-item"><i style="color:{color}" class="icon icon-controller-stop" aria-hidden="true"></i><p></p></li>
         {/cats}
     </ul>
 </div>
-<div class="threads">
+<div class="threads col-md-11">
 <table class="table index-table">
     <thead>
     <tr>
@@ -37,13 +36,15 @@
     <td>{category}</td>
     <td>{read}/{reply}</td>
     <td>{username}</td>
-    <td>{time}</td>
+    <td>{@formatDate date="{time}" format="YY-MM-DD HH:mm" lan="zh-CN" /}</td>
 </tr>
 {/threads}
 </tbody>
 </table>
 
 </div>
+</div>
+
     {/bodyContent}
 
 </body>

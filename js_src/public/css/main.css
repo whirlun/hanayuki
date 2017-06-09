@@ -13,6 +13,10 @@ a:after{
     color: gray;
 }
 
+body {
+    overflow: hidden;
+}
+
 .index-nav {
     float:right;
 }
@@ -45,4 +49,8 @@ a:after{
 .index-table {
     width:90%;
     margin-left: 5%;
+}
+
+.table {
+    width:90% !important;
 }
