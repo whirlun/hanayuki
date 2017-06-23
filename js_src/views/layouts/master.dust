@@ -10,6 +10,7 @@
 
      <link href="css/main.css" rel="stylesheet">
      <script src="https://cdn.bootcss.com/moment.js/2.2.1/moment+langs.min.js"></script>
+     <script src="js/ajax.js"></script>
      <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
  <style>
       /* note: this is a hack for ios iframe for bootstrap themes shopify page */
@@ -83,6 +84,7 @@
 <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/tether/1.4.0/js/tether.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="js/jquery.serializejson.min.js"></script>
 </body>
 {+footer}
 <footer  class="container-fluid foot-wrap" th:fragment="footer">

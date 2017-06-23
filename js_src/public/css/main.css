@@ -13,10 +13,6 @@ a:after{
     color: gray;
 }
 
-body {
-    overflow: hidden;
-}
-
 .index-nav {
     float:right;
 }

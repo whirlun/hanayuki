@@ -39,7 +39,7 @@ start_link() ->
 %%---------------------------------------------------------------------
 
 render_index(Index, Offset) ->
-	Reply = gen_server:call(?SERVER, {render, Index, Offset}),
+	Reply = gen_server:call(?SERVER, {render, Index, Offset},10000),
 {ok, Reply}.
 
 %%---------------------------------------------------------------------
@@ -93,7 +93,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%%====================================================================
 
 jsonify([], Result) ->
-	EJson = {[{threads, Result}]},
+	Result1 = lists:reverse(Result),
+	EJson = {[{threads, Result1}]},
 	EJson;
 jsonify([H|T], Result) ->
 	{'_id',_,title,Title,content,_,read,Read,reply,_,username, Username, 

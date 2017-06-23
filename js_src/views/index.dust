@@ -4,7 +4,7 @@
 <body>
 {<bodyContent}
 <div class="row index-btn-group">
-    <button type="button" class="btn btn-success btn-lg">发帖</button>
+    <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#addThread">发帖</button>
     <button type="button" class="btn btn-info">最新</button>
     <button type="button" class="btn btn-info">最热</button>
     <button type="button" class="btn btn-info">倒序</button>
@@ -14,7 +14,7 @@
 <div class="sidebar col-md-1">
     <ul class="list-group">
         {#cats}
-        <li class="list-group-item"><i style="color:{color}" class="icon icon-controller-stop" aria-hidden="true"></i><p></p></li>
+        <li class="list-group-item"><i style="color:{color}" class="icon icon-controller-stop" aria-hidden="true"></i><p>{cat}</p></li>
         {/cats}
     </ul>
 </div>
@@ -45,6 +45,61 @@
 </div>
 </div>
 
+<div class="modal fade" id="addThread" tabindex="-1" role="dialog" aria-labelledby="addThread">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">新讨论串</h4>
+      </div>
+      <div class="modal-body" id="modalContent">
+        <form id="pushForm" action="/add" method="POST">
+            <div class="form-group">
+                <label for="title">标题</label>
+                <input name="title" type="text" class="form-control" id="title" placeholder="标题" />
+            </div>
+            <div class="form-group">
+                <label for="content">正文</label>
+                <textarea name="content" class="form-control" rows="10"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="category">分类</label>
+                <select name="cat" class="form-control">
+                    {#cats}
+                    <option>{cat}</option>
+                    {/cats}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="accesslevel">阅读权限</label>
+                <select name="accesslevel" class="form-control">
+                    {#accesslevels}
+                    <option>{accesslevel}</option>
+                    {/accesslevels}
+                </select>
+            </div>
+                <input type="hidden" name="_csrf" value="{csrf}">
+        </form>
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" onclick="push()">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    let push = () => {$.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: '/add',
+        data: JSON.stringify($("#pushForm").serializeJSON()),
+        success: () => {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>成功发送讨论串</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
+        $("#modalContent").html(success); $("#modalFooter").html("");$("#addThread").on("hidden.bs.modal", () =>  location.reload() );},
+        error: () => {var error = "<div class='text-center'><span class='glyphicon glyphicon-remove' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>错误-发生内部错误，请刷新后再试</p>";
+    $("#modalContent").html(error); $("#modalFooter").html("");$("#addThread").on("hidden.bs.modal", () =>  location.reload() );}
+    })};
+</script>
     {/bodyContent}
 
 </body>

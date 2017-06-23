@@ -81,10 +81,10 @@ public class MongoConnector {
         MongoCollection<Document> collection = mdb.getCollection(setname);
         int index = ((Long)convert2Java(values.elementAt(0))).intValue();
         int offset =((Long)convert2Java(values.elementAt(1))).intValue();
-        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(sort(orderBy(ascending("time"))),
+        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(sort(orderBy(descending("time"))),
                 skip(index),
-                limit(offset-index),
-                out("thread")));
+                limit(offset),
+                out("latestThread")));
         for(Document doc:result) {
             results.add(doc);
         }

@@ -13,7 +13,7 @@ public class MongoNode {
 
     public MongoNode(String nodeName, String cookie, String databaseName) throws Exception{
         super();
-        exec = Executors.newFixedThreadPool(10);
+        exec = Executors.newFixedThreadPool(20);
         node = new OtpNode(nodeName, cookie);
         mbox = node.createMbox("mongo_server");
         conn = new MongoConnector(databaseName);
