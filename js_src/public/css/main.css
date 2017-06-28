@@ -13,6 +13,11 @@ a:after{
     color: gray;
 }
 
+.navbar-default {
+    background-color: transparent;
+    border-bottom: 2px solid transparent;
+}
+
 .index-nav {
     float:right;
 }
@@ -22,8 +27,24 @@ a:after{
     align-items: center;
 }
 
-.navbar-nav {
-    margin-left:400px;
+.navbar-left >li>a {
+    position: block;
+    height: 40px;
+    padding: 8px 12px;
+    margin: 3px 6px;
+    font-size: 1.5em;
+    background-color: transparent !important;
+    
+}
+
+
+
+.glyphicon-search{
+    color: #82CEF2;
+}
+
+.active a {
+    border-bottom: 2px solid #82CEF2;
 }
 
 .index-btn-group > button {
@@ -49,4 +70,63 @@ a:after{
 
 .table {
     width:90% !important;
+}
+
+.index-search input {
+    outline: none;
+    border:  none;
+    padding: 0 42px 0 15px;
+    box-shadow: none;
+    border-bottom: 2px solid transparent;
+    outline: none;
+    background: transparent;
+    transition: 1s cubic-bezier(0, 0.8, 0, 1);
+    top: 0;
+    right: 0;
+    z-index: 2;
+}
+
+.index-search input:focus {
+    border: none;
+    box-shadow: none;
+    width: 300px;
+    z-index: 1;
+    border-bottom: 2px solid #82CEF2;
+    border-radius: none;
+}
+
+.index-search button {
+    height: 33px;
+    width: 40px;
+    align: center;
+    background: transparent;
+    margin-left: 5px;
+    border: none;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    transition: background 0.4s;
+}
+
+.navbar-right >li>a {
+    height: 33px;
+    width: 40px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin:15px 3px 0 6px;
+    font-size: 1.2em;
+    font-family: "Helbetica Neue", Helvetica, Arial, sans-serif;
+}
+#register > *{
+    width:450px;
+    align:center;
+}
+
+
+.small-form > input {
+    width: 350px;
+}
+#repeat {
+    margin-top:50px;
 }

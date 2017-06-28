@@ -32,7 +32,7 @@
 <tbody>
     {#threads}
     <tr>
-<td><a href="{tid}">{title}</a></td>
+<td><a href="{id}">{title}</a></td>
     <td>{category}</td>
     <td>{read}/{reply}</td>
     <td>{username}</td>
@@ -64,7 +64,7 @@
             </div>
             <div class="form-group">
                 <label for="category">分类</label>
-                <select name="cat" class="form-control">
+                <select name="category" class="form-control">
                     {#cats}
                     <option>{cat}</option>
                     {/cats}
@@ -92,7 +92,7 @@
     let push = () => {$.ajax({
         type: 'POST',
         contentType: 'application/json',
-        url: '/add',
+        url: '/thread/add',
         data: JSON.stringify($("#pushForm").serializeJSON()),
         success: () => {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>成功发送讨论串</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
         $("#modalContent").html(success); $("#modalFooter").html("");$("#addThread").on("hidden.bs.modal", () =>  location.reload() );},

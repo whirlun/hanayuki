@@ -10,10 +10,7 @@ require('dustjs-helpers');
 require('moment');
 require('dustjs-helper-formatdate');
 var cons = require('consolidate');
-
 app.set('port', process.env.PORT || 3000);
-
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.engine('dust', cons.dust);
@@ -25,8 +22,24 @@ app.use(session({
     saveUninitialized: false,
     secret: "ddddddddd"
 }));
-app.use(csrf());
+
+var csrfWhitelist = (req, res, next) =>{
+var csrfEnabled = true;
+var whitelist = new Array("/user/checkusername");
+if (whitelist.indexOf(req.path) != -1) {
+    csrfEnabled = false;
+}
+if (csrfEnabled) {
+    csrf()(req, res, next);
+}else {
+    next();
+}
+}
+
+app.use(csrfWhitelist);
 require('./routes.js')(app);
+redisClient = require('./models/redis.js');
+global.client = redisClient.init();
 
 var server;
 

@@ -3,6 +3,8 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.ericsson.otp.erlang.*;
 import com.mongodb.MongoClient;
@@ -13,11 +15,13 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.mongodb.Block;
 import com.mongodb.DBObject;
+import static com.mongodb.client.model.Projections.*;
 import static com.mongodb.client.model.Sorts.*;
 import static com.mongodb.client.model.Aggregates.*;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Projections;
+import org.bson.types.Binary;
 
 public class MongoConnector {
     private MongoDatabase mdb;
@@ -83,18 +87,34 @@ public class MongoConnector {
         int offset =((Long)convert2Java(values.elementAt(1))).intValue();
         AggregateIterable<Document> result = collection.aggregate(Arrays.asList(sort(orderBy(descending("time"))),
                 skip(index),
-                limit(offset),
-                out("latestThread")));
+                limit(offset)));
         for(Document doc:result) {
             results.add(doc);
         }
         return results;
     }
 
+    public HashMap<String, List<Document>> prepareCache(String setname, OtpErlangList keys, OtpErlangList values) throws Exception{
+        HashMap<String, List<Document>> result = new HashMap<>();
+        List<Document> threadResult = new ArrayList<>();
+        List<Document> userResult = new ArrayList<>();
+        MongoCollection<Document> userCollection = mdb.getCollection(setname);
+        int userTime = ((Long)convert2Java(values.elementAt(2))).intValue();
+        threadResult = latestThread("thread", keys, values);
+        AggregateIterable<Document> rawUserResult = userCollection.aggregate(Arrays.asList(match(Filters.gte("registertime", userTime)), 
+                                                                                            project(fields(include("username")))));
+        for(Document doc:rawUserResult) {
+            userResult.add(doc);
+        }
+        result.put("thread", threadResult);
+        result.put("username", userResult);
+        return result;
+    }
+
     private enum OtpTypes {
         OTPERLANGATOM, OTPERLANGBYTE, OTPERLANGCHAR, OTPERLANGDOUBLE, OTPERLANGFLOAT,
         OTPERLANGINT, OTPERLANGLIST, OTPERLANGLONG, OTPERLANGUINT, OTPERLANGUSHORT,
-        OTPERLANGTUPLE, OTPERLANGSHORT,OTPERLANGSTRING;
+        OTPERLANGTUPLE, OTPERLANGSHORT,OTPERLANGSTRING, OTPERLANGBINARY
     }
 
     private Object convert2Java(OtpErlangObject erlangObject) throws Exception {
@@ -141,6 +161,10 @@ public class MongoConnector {
                 break;
             case OTPERLANGSTRING:
                 result = convert2Java((OtpErlangString)erlangObject);
+                break;
+            case OTPERLANGBINARY:
+                result = convert2Java((OtpErlangBinary)erlangObject);
+                break;
         }
         return result;
     }
@@ -149,6 +173,11 @@ public class MongoConnector {
     }
     private String convert2Java(OtpErlangString erlangObject) throws Exception {
         return (String)erlangObject.stringValue();
+    }
+    private Binary convert2Java(OtpErlangBinary erlangObject) throws Exception {
+        byte[] binaryData = erlangObject.binaryValue();
+        return new Binary(binaryData);
+        
     }
     private Float convert2Java(OtpErlangFloat erlangObject) throws Exception {
         return (Float)erlangObject.floatValue();

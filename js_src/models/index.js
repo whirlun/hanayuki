@@ -14,7 +14,7 @@ module.exports = local = {
 			callback(reply);
 			client.end();
 		})
-		let request = {"module": "index", "function": "render_index", "arg": [index, offset]};
+		let request = {"module": "ha_index", "function": "render_index", "arg": [index, offset]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
 	},
@@ -26,7 +26,7 @@ module.exports = local = {
 			callback(reply);
 			client.end();
 		})
-		let request = {"module": "index", "function": "add_thread", "arg": [title, content, username, category, accessLevel]};
+		let request = {"module": "ha_index", "function": "add_thread", "arg": [title, content, username, category, accessLevel]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
 	} 

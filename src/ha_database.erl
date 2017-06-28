@@ -1,7 +1,7 @@
 -module(ha_database).
 
 %%API
--export([insert/3, remove/3, find/3, update/4, latest_thread/2]).
+-export([insert/3, remove/3, find/3, update/4, latest_thread/2, prepare_cache/3]).
 
 -define(DEFAULT_NODE, 'javaNode@BBrabbit-surface').
 
@@ -29,4 +29,11 @@ latest_thread(Index, Offset) ->
     case Status of 
     error -> {error, Result};
     ok -> Result
+    end.
+
+prepare_cache(Index, Offset, UserTime) ->
+    {Status, Result} = ha_mongo:prepare_cache(?DEFAULT_NODE, user, [], [Index, Offset, UserTime, a]),
+    case Status of
+        error -> {error, Result};
+        ok -> Result
     end.

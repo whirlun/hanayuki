@@ -4,12 +4,14 @@
   {modules, [
              ha_app,
              ha_sup,
-             index_sup,
-             index,
-             sc_server,
-             sc_sup,
+             ha_index_sup,
+             ha_index,
+             ha_sc_server,
+             ha_sc_sup,
              ha_database,
-             ha_mongo
+             ha_mongo,
+             ha_user_sup,
+             ha_user
             ]},
   {registered, [ha_app]},
   {applications, [kernel, stdlib]},

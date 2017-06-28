@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.ericsson.otp.erlang.*;
 import org.bson.AbstractBsonReader.State;
@@ -31,7 +33,7 @@ public class MongoTask implements Runnable {
     }
 
     private enum actions {
-        INSERT, REMOVE, FIND, UPDATE, LATESTTHREAD;
+        INSERT, REMOVE, FIND, UPDATE, LATESTTHREAD, PREPARECACHE;
     }
 
     public void run() {
@@ -52,7 +54,9 @@ public class MongoTask implements Runnable {
                     break;
                 case LATESTTHREAD:
                     doLatestThread();
-
+                    break;
+                case PREPARECACHE:
+                    doPrepareCache();
             }}catch (Exception e){
             OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
                     new OtpErlangAtom("reply"), new OtpErlangAtom("error"), ref
@@ -118,7 +122,44 @@ public class MongoTask implements Runnable {
         mbox.send(from, reply);
     }
 
-    private enum JavaTypes {
+    private void doPrepareCache() throws Exception {
+        ArrayList<OtpErlangObject> threadList = new ArrayList<>();
+        ArrayList<OtpErlangObject> usernameList = new ArrayList<>();
+        ArrayList<OtpErlangObject> erlangResult = new ArrayList<>();
+        HashMap<String, List<Document>> result = new HashMap<>();
+        result = conn.prepareCache(setname, keys, values);
+        List<Document> threads = result.get("thread");
+        List<Document> usernames = result.get("username");
+        result = null;
+        for(Document thread:threads){
+            threadList.add(java2Erlang(thread));
+        }
+        threads = null;
+        for(Document username:usernames){
+            usernameList.add(java2Erlang(username));
+        }
+        usernames = null;
+        OtpErlangObject[] threadArray = new OtpErlangObject[threadList.size()];
+        threadList.toArray(threadArray);
+        OtpErlangList erlangThreadList = new OtpErlangList(threadArray);
+        threadArray = null;
+        OtpErlangObject[] userArray = new OtpErlangObject[usernameList.size()];
+        usernameList.toArray(userArray);
+        OtpErlangList erlangUserList = new OtpErlangList(userArray);
+        userArray = null;
+        erlangResult.add(new OtpErlangAtom("thread"));
+        erlangResult.add(erlangThreadList);
+        erlangResult.add(new OtpErlangAtom("username"));
+        erlangResult.add(erlangUserList);
+        OtpErlangObject[] erlangArray = new OtpErlangObject[erlangResult.size()];
+        erlangResult.toArray(erlangArray);
+        OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
+                new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), new OtpErlangTuple(erlangArray), ref
+        });        
+        mbox.send(from, reply);
+    }
+
+        private enum JavaTypes {
         STRING, DOUBLE, FLOAT, INTEGER, LONG, LIST, DOCUMENT, ARRAYLIST;
     }
 
@@ -223,6 +264,9 @@ public class MongoTask implements Runnable {
                             break;
                         case UNDEFINED:
                             arrayList.add(new OtpErlangAtom("nil"));
+                            break;
+                        case BINARY:
+                            arrayList.add(new OtpErlangBinary(reader.readBinaryData().getData()));
                             break;
                         case ARRAY:
                             arrayList.add(java2Erlang((ArrayList)javaTerm.get(fieldName)));

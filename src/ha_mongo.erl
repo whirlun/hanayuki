@@ -6,7 +6,7 @@
 
 -module(ha_mongo).
 
--export([insert/4, remove/4, update/5, find/4, latest_thread/4]).
+-export([insert/4, remove/4, update/5, find/4, latest_thread/4, prepare_cache/4]).
 
 insert(Node, Setname, Keys, Values) ->
     Ref = make_ref(),  
@@ -65,5 +65,17 @@ latest_thread(Node, Setname, Keys, Values) ->
         {reply, error, Ref} ->
             {error, internalerror}
     after 3000 ->
+        {error, timeout}
+    end.
+
+prepare_cache(Node, Setname, Keys, Values) ->
+    Ref = make_ref(),
+    {mongo_server, Node} ! {preparecache, self(), Ref, Setname, Keys, Values},
+    receive
+        {reply, ok, Result, Ref} ->
+            {ok, Result};
+        {reply, error, Ref} ->
+            {error, internalerror}
+    after 30000 ->
         {error, timeout}
     end.

@@ -8,10 +8,10 @@
     <meta name="keywords" content="">
     <meta name="author" content="">
 
-     <link href="css/main.css" rel="stylesheet">
      <script src="https://cdn.bootcss.com/moment.js/2.2.1/moment+langs.min.js"></script>
-     <script src="js/ajax.js"></script>
      <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+     <link href="https://cdn.bootcss.com/normalize/7.0.0/normalize.min.css" rel="stylesheet">
+     <link href="css/main.css" rel="stylesheet">
  <style>
       /* note: this is a hack for ios iframe for bootstrap themes shopify page */
       /* this chunk of css is not part of the toolkit :) */
@@ -41,32 +41,18 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-        <li><a href="#">Link</a></li>
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">One more separated link</a></li>
-          </ul>
-        </li>
+      <ul class="nav navbar-nav navbar-left">
+        <li class="active"><a href="/">主页<span class="sr-only">(current)</span></a></li>
       </ul>
-      <form class="navbar-form navbar-left">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search">
-        </div>
-        <button type="submit" class="btn btn-default">Submit</button>
-      </form>
+
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">Link</a></li>
+        <li>
+        </li>
+        {#loginStatus}
+        <img class="user-avatar" href={user.avatar}><p>{user.username}</p></img>
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+          <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="#">Action</a></li>
             <li><a href="#">Another action</a></li>
@@ -75,7 +61,17 @@
             <li><a href="#">Separated link</a></li>
           </ul>
         </li>
+        {:notLogin}
+        <li><a data-toggle="modal" data-target="#login">登录</a></li>
+        <li><a  data-toggle="modal" data-target="#register">注册</a></li>
+        {/loginStatus}
       </ul>
+      <form class="navbar-form navbar-right">
+        <div class="form-group index-search">
+          <input class="form-control" type="text" placeholder="搜索">
+          <button class="btn" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></button>
+        </div>
+      </form>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
@@ -85,9 +81,101 @@
 <script src="https://cdn.bootcss.com/tether/1.4.0/js/tether.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="js/jquery.serializejson.min.js"></script>
+<div class="modal fade" id="register" tabindex="-1" role="dialog" aria-labelledby="registerModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+     
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="register">注册</h4>
+      </div>
+      <div class="modal-body" id="registerContent">
+         <div id="register-warning" class="alert alert-warning" style="display:none">
+        <a href="#" class="close" data-dismiss="alert">
+		&times;
+	</a>
+  <strong id="warning-message"></strong>
+</div>
+        <form id="registerForm" action="/user/register" method="POST">
+        <div class="row">
+        <div class="form-group col-md-9">
+          <label for="username">用户名</label>
+          <input name="username" type="text" class="form-control" id="username" placeholder="用户名" oninput="checkUsername()">
+          </div>
+        <div class="col-md-3" style="margin-top:30px;">
+          <span id = "repeat" width="30px"></span>
+        </div>
+        </div>
+        <div class="row">
+        <div class="form-group col-md-9">
+          <label for="password">密码</label>
+          <input name="password" type="password" class="form-control" id="password" placeholder="密码">
+          </div>
+        <div class="col-md-3">
+          <a id="showpassword" href="javascript:void(0)" onclick="showpassword()" data-show="false">显示密码</a>
+        </div>
+        </div>
+        <div class="row">
+        <div class="form-group col-md-9">
+          <label for="email">邮箱</label>
+          <input name="email" type="text" class="form-control" id="email" placeholder="邮箱">
+        </div>
+        </div>
+        <div class="row">
+        <div class="form-group col-md-9">
+          <label for="nickname">昵称</label>
+          <input name="nickname" type="text" class="form-control" id="nickname" placeholder="昵称">
+        </div>
+        </div>
+        <input type="hidden" name="_csrf" value="{csrf}">
+        </form>
+      </div>
+      <div class="modal-footer" id="registerFooter">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" onclick="register()">注册</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    let register = () => {$.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: '/user/register',
+        data: JSON.stringify($("#registerForm").serializeJSON()),
+        success: () => {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>注册成功</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
+        $("#registerContent").html(success); $("#registerFooter").html("");$("#register").on("hidden.bs.modal", () =>  location.reload() );},
+        error: (msg) => {var error = {"1":"用户名或昵称长度不能超过40字符哟", "2":"哎呀，密码长度要在8至20字符之间才行",
+        "3": "电邮地址输入有误哦，再看看吧"};
+          var jsonData = JSON.parse(msg['responseText']);
+         var err =error[jsonData['errorcode']];$("#warning-message").html(err);$("#register-warning").css("display","block")}
+    })};
+    let checkUsername = () => {
+      let jsonData = {"username": $("#username").val()};
+      $.ajax({
+      type: 'POST',
+      contentType: 'application/json',
+      url: '/user/checkusername',
+      data: JSON.stringify(jsonData),
+      success: (repeat) => {var jsondata = JSON.parse(repeat);if(jsondata['repeat']){ $('#repeat').html("用户名重复").css('color', 'red')}
+        else {$('#repeat').html("用户名可用").css('color', 'green') }}
+    })};
+    let showpassword = () => {
+      if ($("#showpassword").attr("data-show") == "true") {
+        $("#password").attr("type", "password");
+        $("#showpassword").html("显示密码");
+        $("#showpassword").attr("data-show", false)
+      }
+      else {
+        $("#password").attr("type", "text");
+        $("#showpassword").html("隐藏密码");
+        $("#showpassword").attr("data-show", true)
+      }
+    }
+</script>
 </body>
 {+footer}
 <footer  class="container-fluid foot-wrap" th:fragment="footer">
-    <p align="center">Hanayuki-Java Test Version 0.01</p></footer>
+    <p align="center">Hanayuki development version</p></footer>
 {/footer}
 </html>

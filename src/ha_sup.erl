@@ -26,10 +26,12 @@ init([]) ->
 		undefined -> ?DEFAULT_PORT
 	end,
 	{ok, LSock} = gen_tcp:listen(Port, [{active, true}]),
-	Socket_sup = {sc_sup, {sc_sup, start_link, [LSock]},
-				permanent, 2000, supervisor, [sc_server]},
-    Index_sup = {index_sup, {index_sup, start_link, []},
-    			permanent, 2000, supervisor, [index]},
-    Children = [Socket_sup, Index_sup],
+	Socket_sup = {ha_sc_sup, {ha_sc_sup, start_link, [LSock]},
+				permanent, 2000, supervisor, [ha_sc_server]},
+    Index_sup = {ha_index_sup, {ha_index_sup, start_link, []},
+    			permanent, 2000, supervisor, [ha_index]},
+	User_sup = {ha_user_sup, {ha_user_sup, start_link, []},
+				permanent, 2000, supervisor, [ha_user]},
+    Children = [Socket_sup, Index_sup, User_sup],
     RestartStrategy = {one_for_one, 0, 1},
     {ok, {RestartStrategy, Children}}.
