@@ -16,3 +16,5 @@ javaconfig.json
 com
 npm-debug.log
 launch.json
+dump.rdb
+appendonly.aof
