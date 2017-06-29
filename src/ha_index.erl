@@ -119,5 +119,6 @@ render_jsonify([H|T], Result) ->
 user_jsonify([], Result) ->
 	Result;
 user_jsonify([H|T], Result) ->
-	{'_id', _, username, Username} = H,
-	user_jsonify(T, [list_to_binary(Username)| Result]).
+	{'_id', _, username, Username, email, Email} = H,
+	H1 = {[{username, list_to_binary(Username)}, {email, list_to_binary(Email)}]},
+	user_jsonify(T, [H1| Result]).

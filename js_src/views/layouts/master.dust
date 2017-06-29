@@ -58,11 +58,11 @@
             <li><a href="#">Another action</a></li>
             <li><a href="#">Something else here</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
+            <li><a href="javascript:void(0)" onclick="logout()">登出</a></li>
           </ul>
         </li>
         {:notLogin}
-        <li><a data-toggle="modal" data-target="#login">登录</a></li>
+        <li><a data-toggle="modal" data-target="#login">登陆</a></li>
         <li><a  data-toggle="modal" data-target="#register">注册</a></li>
         {/loginStatus}
       </ul>
@@ -81,10 +81,48 @@
 <script src="https://cdn.bootcss.com/tether/1.4.0/js/tether.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="js/jquery.serializejson.min.js"></script>
+
+<div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="loginModal" >
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">    
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="login">登陆</h4>
+      </div>
+      <div class="modal-body" id="loginContent">
+         <div id="login-warning" class="alert alert-warning" style="display:none">
+        <a href="#" class="close" data-dismiss="alert">
+		&times;
+	</a>
+  <strong id="login-warning-message">{login-warning}</strong>
+</div>
+        <form id="loginForm" action="/user/login" method="POST">
+        <div class="row">
+        <div class="form-group col-md-10 col-md-offset-1">
+          <label for="username">用户名</label>
+          <input name="username" type="text" class="form-control" id="login-username" placeholder="用户名" oninput="checkUsername()">
+          </div>
+        </div>
+        <div class="row">
+        <div class="form-group col-md-10 col-md-offset-1">
+          <label for="password">密码</label>
+          <input name="password" type="password" class="form-control" id="login-password" placeholder="密码">
+          </div>
+        </div>
+        <input type="hidden" name="_csrf" value="{csrf}">
+        </form>
+      </div>
+      <div class="modal-footer" id="loginFooter">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" onclick="login()">登陆</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 <div class="modal fade" id="register" tabindex="-1" role="dialog" aria-labelledby="registerModal">
   <div class="modal-dialog" role="document">
-    <div class="modal-content">
-     
+    <div class="modal-content">    
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="register">注册</h4>
@@ -94,7 +132,7 @@
         <a href="#" class="close" data-dismiss="alert">
 		&times;
 	</a>
-  <strong id="warning-message"></strong>
+  <strong id="warning-message">{register-warning}</strong>
 </div>
         <form id="registerForm" action="/user/register" method="POST">
         <div class="row">
@@ -111,8 +149,8 @@
           <label for="password">密码</label>
           <input name="password" type="password" class="form-control" id="password" placeholder="密码">
           </div>
-        <div class="col-md-3">
-          <a id="showpassword" href="javascript:void(0)" onclick="showpassword()" data-show="false">显示密码</a>
+        <div class="col-md-3" style="margin-top:33px;">
+         <a id="showpassword" href="javascript:void(0)" onclick="showpassword()" data-show="false">显示密码</a>
         </div>
         </div>
         <div class="row">
@@ -145,10 +183,22 @@
         data: JSON.stringify($("#registerForm").serializeJSON()),
         success: () => {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>注册成功</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
         $("#registerContent").html(success); $("#registerFooter").html("");$("#register").on("hidden.bs.modal", () =>  location.reload() );},
-        error: (msg) => {var error = {"1":"用户名或昵称长度不能超过40字符哟", "2":"哎呀，密码长度要在8至20字符之间才行",
-        "3": "电邮地址输入有误哦，再看看吧"};
+        error: (msg) => {var error = {"1":"用户名或昵称必须填写，且长度不能超过40字符哟", "2":"哎呀，密码长度要在8至20字符之间才行",
+        "3": "电邮地址输入有误哦，再看看吧", "4": "看来有人先你一步抢占了这个用户名哦，换一个吧", "5": "这个电邮地址已经用过了，不能再用了哦", "6": "用户名不能为纯数字，加点别的吧"};
           var jsonData = JSON.parse(msg['responseText']);
          var err =error[jsonData['errorcode']];$("#warning-message").html(err);$("#register-warning").css("display","block")}
+    })};
+    let login = () => {
+      $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: '/user/login',
+        data: JSON.stringify($("#loginForm").serializeJSON()),
+        success: () => {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>登陆成功</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
+        $("#loginContent").html(success); $("#loginFooter").html("");$("#login").on("hidden.bs.modal", () =>  location.reload() );},
+        error: (msg) => {var error = {"1":"没找到这个用户，再检查检查用户名吧","2":"密码有错哦，重新输一遍试试"};
+          var jsonData = JSON.parse(msg['responseText']);
+         var err =error[jsonData['errorcode']];$("#login-warning-message").html(err);$("#login-warning").css("display","block")}
     })};
     let checkUsername = () => {
       let jsonData = {"username": $("#username").val()};
@@ -160,6 +210,16 @@
       success: (repeat) => {var jsondata = JSON.parse(repeat);if(jsondata['repeat']){ $('#repeat').html("用户名重复").css('color', 'red')}
         else {$('#repeat').html("用户名可用").css('color', 'green') }}
     })};
+    let logout = () => {
+      let jsonData = {"logout":true, "_csrf": "{csrf}"};
+      $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: 'user/logout',
+        data:JSON.stringify(jsonData),
+        success: () => {location.reload()}
+      })
+    };
     let showpassword = () => {
       if ($("#showpassword").attr("data-show") == "true") {
         $("#password").attr("type", "password");

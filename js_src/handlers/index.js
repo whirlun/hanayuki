@@ -3,11 +3,12 @@ let Index = require('../models/index.js');
 
 exports.index = (req, res) => {
 	let index, offset;
+	let prefix = "ha_";
 	isNaN(req.query.index) ? index = 0 : index = req.query.index;
 	isNaN(req.query.offset) ? offset=20 :offset = req.query.offset;
 	offset > 20 ? offset = 20 : offset;
 	if (index+offset < 200 && redisInUse == true) {
-		client.lrange("threads", 200 - index-offset, 200-index+1, (err, threadList) => {
+		client.lrange(prefix + "threads", 200 - index-offset, 200-index+1, (err, threadList) => {
 		let viewModal = new Object();
 		let temp = [];
 		for(let i = 0; i < threadList.length; i++) {		

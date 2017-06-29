@@ -4,9 +4,11 @@ let net = require('net');
 
 let HOST = "127.0.0.1";
 let PORT = 2333;
+let prefix = "ha_"
 var local;
 
 exports.init = () => {
+    global.redisInUse = false;
     let client = redis.createClient(6379, '127.0.0.1', {"password":"1zHyBRMvAVA@s@%bu3Z"});
     let netclient = new net.Socket().connect(PORT, HOST);
     client.on("error", (err) =>{
@@ -24,10 +26,11 @@ exports.init = () => {
           let stringed = JSON.parse(reply);
 		    let jsonReply = JSON.parse(stringed);
           for (let i = 0; i < jsonReply["threads"].length; i++) {
-            client.lpush("threads", JSON.stringify(jsonReply["threads"][i]));
+            client.lpush(prefix + "threads", JSON.stringify(jsonReply["threads"][i]));
           }
           for(let j = 0; j < jsonReply["usernames"].length; j++) {
-            client.sadd("usernames", jsonReply["usernames"][j]);
+            client.sadd(prefix + "usernames", jsonReply['usernames'][j]['username']);
+            client.sadd(prefix + "email", jsonReply['usernames'][j]['email']);
           }
           global.redisInUse = true;
         })  

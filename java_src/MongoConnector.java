@@ -102,7 +102,7 @@ public class MongoConnector {
         int userTime = ((Long)convert2Java(values.elementAt(2))).intValue();
         threadResult = latestThread("thread", keys, values);
         AggregateIterable<Document> rawUserResult = userCollection.aggregate(Arrays.asList(match(Filters.gte("registertime", userTime)), 
-                                                                                            project(fields(include("username")))));
+                                                                                            project(fields(include("username", "email")))));
         for(Document doc:rawUserResult) {
             userResult.add(doc);
         }

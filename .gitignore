@@ -18,3 +18,4 @@ npm-debug.log
 launch.json
 dump.rdb
 appendonly.aof
+.DS_Store

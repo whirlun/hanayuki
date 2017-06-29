@@ -123,10 +123,22 @@ a:after{
     align:center;
 }
 
+#login > * {
+    width:450px;
+    align:center;
+}
+
 
 .small-form > input {
     width: 350px;
 }
 #repeat {
     margin-top:50px;
+}
+
+#showpassword a:link,
+a:hover,
+a:visited
+{
+    text-decoration: none;
 }

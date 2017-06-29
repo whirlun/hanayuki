@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 require('dustjs-helpers');
 require('moment');
 require('dustjs-helper-formatdate');
+var redisStore = require('connect-redis')(session);
 var cons = require('consolidate');
 app.set('port', process.env.PORT || 3000);
 app.use(bodyParser.json());
@@ -18,8 +19,16 @@ app.set('view engine', 'dust');
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 app.use(session({
-     resave: false,
+    store : new redisStore({
+        host: "127.0.0.1",
+        port: 6379,
+        pass: "1zHyBRMvAVA@s@%bu3Z",
+        db: 1,
+        prefix: "ha_"
+    }),
+     resave: true,
     saveUninitialized: false,
+    cookie: {maxAge: 604800*1000},
     secret: "ddddddddd"
 }));
 
