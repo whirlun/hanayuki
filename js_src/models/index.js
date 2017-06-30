@@ -7,14 +7,14 @@ let PORT = 2333;
 var local;
 
 module.exports = local = {
-	renderIndex: function(index, offset, callback) {
+	renderIndex: function(index, offset, username, callback) {
 		let client = new net.Socket().connect(PORT, HOST);
 		client.on('data', (data) => {
 			let reply = "" + data;
 			callback(reply);
 			client.end();
 		})
-		let request = {"module": "ha_index", "function": "render_index", "arg": [index, offset]};
+		let request = {"module": "ha_index", "function": "render_index", "arg": [index, offset, username]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
 	},

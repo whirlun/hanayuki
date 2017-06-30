@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, render_index/2, add_thread/5, prepare_cache/3]).
+-export ([start_link/0, render_index/3, add_thread/5, prepare_cache/3]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -38,8 +38,8 @@ start_link() ->
 %%@End
 %%---------------------------------------------------------------------
 
-render_index(Index, Offset) ->
-	Reply = gen_server:call(?SERVER, {render, Index, Offset},10000),
+render_index(Index, Offset, Username) ->
+	Reply = gen_server:call(?SERVER, {render, Index, Offset, Username},10000),
 {ok, Reply}.
 
 %%---------------------------------------------------------------------
@@ -69,9 +69,13 @@ init([]) ->
 	{ok, #state{}}.
 	
 
-handle_call({render, Index, Offset},_From, State) ->
-	Result = ha_database:latest_thread(Index, Offset),
-	EJson = {[{threads, render_jsonify(Result, [])}]},
+handle_call({render, Index, Offset, Username},_From, State) ->
+	ThreadResult = ha_database:latest_thread(Index, Offset),
+	UserResult = ha_database:find(user,[username], [Username]),
+	case Username of
+		null ->EJson = {[{threads, render_jsonify(ThreadResult, [])}]};
+		_ ->EJson = {[{threads, render_jsonify(ThreadResult, [])}, {userinfo, login_jsonify(UserResult)}]}
+	end,
 	{reply, State#state{data = EJson}, State};
 handle_call({addthread, Title, Content, Username, Category, Accesslevel}, _From, State) ->
 	{M, S, _} = os:timestamp(),
@@ -122,3 +126,7 @@ user_jsonify([H|T], Result) ->
 	{'_id', _, username, Username, email, Email} = H,
 	H1 = {[{username, list_to_binary(Username)}, {email, list_to_binary(Email)}]},
 	user_jsonify(T, [H1| Result]).
+
+login_jsonify(T) ->
+	{{_id,Id,_,_,_,_,nickname,Nickname,_,_,_,_,_,_,_,_,_,_,avatar,Avatar,_,_,_,_,_,_,_,_,_,_,_,_}} = T,
+	{[{id, list_to_binary(Id)}, {nickname, list_to_binary(Nickname)}, {avatar, list_to_binary(Avatar)}]}.

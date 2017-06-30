@@ -81,7 +81,6 @@ exports.login = (req, res) => {
                     let md5 = crypto.createHash('md5');
                     md5.update(uid);
                     let hash = md5.digest('hex');
-                    console.log(req.cookies['connect.sid']);
                         res.cookie('session', {'username': username, 'sid': hash}, {maxAge: 604800*1000});
                      req.session.username = username;
                      req.session.sid = hash;
