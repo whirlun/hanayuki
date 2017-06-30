@@ -1,3 +1,18 @@
+var cluster = require('cluster');
+var numCPUs = require('os').cpus().length;
+if(cluster.isMaster) {
+    console.log('Master on');
+    var redisClient = require('./models/redis.js');
+    redisClient.init();
+    for (var i = 0; i < numCPUs; i++) cluster.fork();
+    cluster.on('listening', (worker, address) => {
+        console.log('worker' + worker.process.pid + ' is started')
+    });
+    cluster.on('exit', (worker, code, signal) => {
+        console.log('worker' + worker.process.pid + ' is restarting');
+        setTimeout(() => cluster.fork(), 2000 );
+    })
+}else {
 var express = require('express');
 var http = require('http');
 var app = express();
@@ -47,8 +62,8 @@ if (csrfEnabled) {
 
 app.use(csrfWhitelist);
 require('./routes.js')(app);
-redisClient = require('./models/redis.js');
-global.client = redisClient.init();
+var redisClient = require('./models/redis.js');
+global.client = redisClient.getClient();
 
 var server;
 
@@ -66,4 +81,5 @@ if(require.main === module){
 } else {
     // application imported as a module via "require": export function to create server
     module.exports = startServer;
+}
 }

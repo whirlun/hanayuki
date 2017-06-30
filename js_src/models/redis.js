@@ -6,10 +6,10 @@ let HOST = "127.0.0.1";
 let PORT = 2333;
 let prefix = "ha_"
 var local;
-
+var redisPassword = "1zHyBRMvAVA@s@%bu3Z"
 exports.init = () => {
     global.redisInUse = false;
-    let client = redis.createClient(6379, '127.0.0.1', {"password":"1zHyBRMvAVA@s@%bu3Z"});
+    let client = redis.createClient(6379, '127.0.0.1', {"password":redisPassword});
     let netclient = new net.Socket().connect(PORT, HOST);
     client.on("error", (err) =>{
     console.log("Error" + err);
@@ -40,6 +40,13 @@ exports.init = () => {
     let request = {"module": "ha_index", "function": "prepare_cache", "arg": [0, 200, 0]};
 		let buf = new Buffer(JSON.stringify(request));
     netclient.write(buf);
-    return client;
 }
 
+exports.getClient = () => {
+  let client = redis.createClient(6379, '127.0.0.1', {"password":"1zHyBRMvAVA@s@%bu3Z"});
+  global.redisInUse = true;
+  client.on("error", (err) =>{
+    console.log("Error" + err);
+    global.redisInUse = false;});
+    return client;
+}
