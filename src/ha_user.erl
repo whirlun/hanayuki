@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, register/4, login/2]).
+-export ([start_link/0, register/4, login/2, userpage/1, activities/1]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -52,6 +52,26 @@ login(Username, Password) ->
     Reply = gen_server:call(?SERVER, {login, Username, Password}),
     {ok, Reply}.
 
+%%---------------------------------------------------------------------
+%%@doc get user's info
+%%@spec login(Username::String() || atom()) -> {ok, Reply}
+%%@End
+%%---------------------------------------------------------------------
+
+userpage(Username) ->
+    Reply = gen_server:call(?SERVER, {userpage, Username}),
+    {ok, Reply}.
+
+%%---------------------------------------------------------------------
+%%@doc get user activities by default option of threads
+%%@spec login(Threads::List()) -> {ok, Reply}
+%%@End
+%%---------------------------------------------------------------------
+
+activities(Threads) ->
+    Reply = gen_server:call(?SERVER, {activities, Threads}),
+    {ok, Reply}.
+
 %%%====================================================================
 %%% callbacks
 %%%====================================================================
@@ -75,13 +95,23 @@ handle_call({login, Username, Password}, _From, State) ->
     Result = ha_database:find(user, [username], [Username]),
     case Result of
         {} -> {reply, State#state{data={[{status, nouser}]}}, State};
-        {_} -> {{_id,Id,_,_,password,Pass,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}} = Result,
+        {_} -> {{_id,Id,_,_,password,Pass,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}} = Result,
                 Pass1 = crypto:hash(sha256, Password),
                 case Pass == Pass1 of
                 true -> {reply, State#state{data={[{status, verified}, {id, list_to_binary(Id)}]}}, State};
                 false -> {reply, State#state{data={[{status, wrongpass}]}}, State}
             end
-        end.
+        end;
+handle_call({userpage, Username}, _From, State) ->
+    Result = ha_database:find(user, [username], [Username]),
+    case Result of
+        {} -> {reply, State#state{data={[{status, nouser}]}}, State};
+        {_} -> {reply, State#state{data={[{userinfo, userpage_jsonify(Result)}]}}, State}
+    end;
+handle_call({activities, Username, Page}, _From, State) ->
+     = ha_database:activities(user, Username, Page),
+    Thread_list = [ha_database:find(user, ['_id'],[T])|| T <- Threads],
+    {reply, State#state{data={[{threads, Thread_list}]}}, State}.
     
 
 handle_cast(stop, State) ->
@@ -114,13 +144,40 @@ register_helper(Username, Password, Nickname, Email) ->
     Pass = crypto:hash(sha256, Password),
     {M, S, _} = os:timestamp(),
 	Result = ha_database:insert('user', [username, password, nickname, registertime, threads, loves, signature
-    , email, avatar, friends, replies, messages, settings, block, role], 
+    , email, avatar, friends, replies, messages, settings, block, role, badge], 
     [Username, Pass, Nickname, 1000000*M+S,[], [], "", Email, "default.jpg", [], [], [], {needreply, true, neednotice, true, needat, true, 
     blacklist, [], replythreadmode, trace, lovenotice, true, watchlist, [], tracelist,[], watchcat, [], watchtag, [],
-    tracetag, [], newpage, true, background, "transparent.png", cardbackground, "transparent.png"}, flase, newbee]),
+    tracetag, [], newpage, true, background, "", cardbackground, ""}, flase, newbee, []]),
 	case Result of 
         ok -> 
            ok;
         {error, _} ->
             error
-        end.
+    end.
+    
+userpage_jsonify(Userinfo) ->
+    {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,_,_,_,_,signature,Signature,
+    email,Email,avatar,Avatar,_,_,_,_,_,_,_,_,block,Block,role,Role,_,_}} = Userinfo,
+        {[{id,list_to_binary(Id)}, {username,list_to_binary(Username)},{nickname,list_to_binary(Nickname)},{registerTime,Registertime},
+        {signature,list_to_binary(Signature)},{email,list_to_binary(Email)},{avatar,list_to_binary(Avatar)},
+        {block,Block},{role,list_to_binary(Role)}]}.
+
+settings_jsonify(Settings) ->
+    {needreply, Needreply, neednotice, Neednotice, needat, Needat, blacklist, Blacklist, replythreadmode, Replythreadmode,
+    lovenotice, Lovenotice, watchlist, Watchlist, tracelist, Tracelist, watchcat, Watchcat, watchtag, Watchtag,
+    tracetag, Tracetag, newpage, Newpage, background, Background, cardbackground, Cardbackground} = Settings,
+    {[{needreply, Needreply}, {neednotice, Neednotice}, {needat, Needat}, {blacklist, lists_to_binary(Blacklist,[])}, {replythreadmode, list_to_binary(Replythreadmode)},
+    {lovenotice, Lovenotice}, {watchlist, lists_to_binary(Watchlist,[])}, {tracelist, lists_to_binary(Tracelist,[])}, {watchcat, lists_to_binary(Watchcat,[])}, 
+    {watchtag,lists_to_binary(Watchtag,[])}, {tracetag, lists_to_binary(Tracetag,[])}, {newpage, Newpage}, {background, list_to_binary(Background)}, {cardbackground, list_to_binary(Cardbackground)}]}.
+
+activities_jsonify([], R) ->
+    R;
+activities_jsonify([H|T], R) ->
+    {}
+
+lists_to_binary([], R) ->
+    R;
+lists_to_binary([H|T], R) ->
+    H1 = list_to_binary(H),
+	lists_to_binary(T, [H1|R]).
+

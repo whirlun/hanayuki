@@ -1,13 +1,13 @@
 *,
 *:after,
-*::before {
+*:::before {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box; }
 
 a,
 a:hover,
-a:before,
+a::before,
 a:after{
     text-decoration: none;
     color: gray;
@@ -31,7 +31,7 @@ a:after{
     position: block;
     height: 40px;
     padding: 8px 12px;
-    margin: 3px 6px;
+    margin: 10px 6px;
     font-size: 1.5em;
     background-color: transparent !important;
     
@@ -75,7 +75,7 @@ a:after{
 .index-search input {
     outline: none;
     border:  none;
-    padding: 0 42px 0 15px;
+    padding: 11px 42px 0 15px;
     box-shadow: none;
     border-bottom: 2px solid transparent;
     outline: none;
@@ -101,6 +101,7 @@ a:after{
     align: center;
     background: transparent;
     margin-left: 5px;
+    margin-top:10px;
     border: none;
     top: 0;
     right: 0;
@@ -114,7 +115,7 @@ a:after{
     border: none;
     padding: 0;
     cursor: pointer;
-    margin:15px 3px 0 6px;
+    margin:25px 3px 0 6px;
     font-size: 1.2em;
     font-family: "Helbetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -135,10 +136,95 @@ a:after{
 #repeat {
     margin-top:50px;
 }
-
 #showpassword a:link,
 a:hover,
 a:visited
 {
     text-decoration: none;
+}
+
+.user-avatar {
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    margin-top: -20px;
+}
+
+#user-dropdown a:link,
+a:hover,
+a:visited {
+    box-shadow:none;
+    text-decoration: none;
+    height:25px;
+}
+
+
+#user-dropdown {
+    float:right
+}
+
+#user-dropdown >a>span {
+    float:right;
+}
+
+#user-dropdown >ul {
+margin-top:20px;
+}
+
+.index-toolbar {
+    margin: 5px 20px 10px 0;
+    float:left;
+}
+
+.index-toolbar > button {
+    border:  none;
+}
+
+.user-detail-btn {
+    position: relative;
+    z-index: 1;
+}
+
+.user-detail-btn a {
+    overflow: hidden;
+    margin: 5px 15px;
+}
+
+.user-detail-btn a span {
+    display: block;
+    padding:6 6px 20px;
+    background-color: #009ACD;
+    -webkit-transition: -webkit-transform 0.3s;
+    -moz-transition: -moz-tranisiton 0.3s;
+    transition: 0.3s;
+}
+
+.user-detail-btn a::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    padding: 6px 20px;
+    width: 100%;
+    height: 100%;
+    color: #009ACD;
+    content: attr(hover-word);
+    -webkit-transition: -webkit-transform 0.3s;
+    -moz-transition: -moz-transform 0.3s;
+    transition: transform 0.3s;
+    -webkit-transform: translateX(-25%);
+}
+
+.user-detail-btn a:hover::before,
+.user-detail-btn a:hover::before {
+    -webkit-transform: translateX(0%);
+    -moz-transform: translateX(0%);
+    transform: translateX(0%);
+}
+
+.user-detail-btn a:hover span,
+.user-detail-btn a:focus span {
+    -moz-transform: translateX(100%);
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
 }

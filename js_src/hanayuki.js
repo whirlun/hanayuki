@@ -62,8 +62,6 @@ if (csrfEnabled) {
 
 app.use(csrfWhitelist);
 require('./routes.js')(app);
-var redisClient = require('./models/redis.js');
-global.client = redisClient.getClient();
 
 var server;
 

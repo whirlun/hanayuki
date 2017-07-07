@@ -1,6 +1,7 @@
 'use strict'
 let User = require('../models/user.js');
 let crypto = require('crypto');
+let redis = require('../models/redis')
 
 exports.register = (req, res) => {
     let username = req.body.username;
@@ -34,6 +35,7 @@ exports.register = (req, res) => {
                             res.end();
                         }
                         else{
+                        redis.register(username);
 		                res.send(viewModel);}})
                     }
                     else {
@@ -93,6 +95,33 @@ exports.login = (req, res) => {
 
 }
 
+exports.userpage = (req, res) => {
+    let username = req.session.username;
+    let userpagename = req.params.username;
+    if(username == userpagename) {
+
+        User.userpage(username, (model) =>
+        {
+            let stringed = JSON.parse(model);
+            let viewModel = JSON.parse(stringed);
+            viewModel.csrf = req.csrfToken();
+            res.render('user', viewModel);  
+        })
+    }
+}
+
+exports.activities = (req, res) => {
+    let threads = req.body.threads;
+    let page = req.body.page;
+    User.activities(threads, (model) =>
+    {
+        let stringed = JSON.parse(model);
+        let viewModel = JSON.parse(stringed);
+        viewModel.page = page;
+        res.send(viewModel);
+    })
+}
+
 exports.logout = (req, res) => {
     let logout = req.body.logout;
     if(logout) {
@@ -104,16 +133,13 @@ exports.logout = (req, res) => {
 
 exports.checkUsername = (req, res) => {
     let username = req.body.username;
-    let prefix = "ha_";
-    if(redisInUse) {
-        client.sismember(prefix + "usernames", username, (err, reply) =>{
-        if(reply) {
+    let used = redis.checkUsername(username);
+    if(used) {
         let jsonData = {"repeat": true};
         res.send(JSON.stringify(jsonData));
     }
 else {
     let jsonData = {"repeat": false};
     res.send(JSON.stringify(jsonData));
-}});
+};
     }
-}

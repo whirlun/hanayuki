@@ -60,7 +60,13 @@
                 <input name="title" type="text" class="form-control" id="title" placeholder="标题" />
             </div>
             <div class="form-group">
-                <label for="content">正文</label>
+                <label for="content" style="width:100%">正文</label>
+                <div class="btn-group index-toolbar" role="group" aria-label="addThreadToolbar">
+                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-bold" aria-label="bold"></span></button>
+                    <button type="button" class="btn btn-default"></button>
+                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-italic" aria-label="italic"></span></button>
+                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-console" aria-label="code"></span>
+                </div>
                 <textarea name="content" class="form-control" rows="10"></textarea>
             </div>
             <div class="form-group">
@@ -106,15 +112,15 @@
   </div>
 </div>
 <script>
-    let push = () => {$.ajax({
+    var push = function()  {$.ajax({
         type: 'POST',
         contentType: 'application/json',
         url: '/thread/add',
         data: JSON.stringify($("#pushForm").serializeJSON()),
-        success: () => {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>成功发送讨论串</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
-        $("#modalContent").html(success); $("#modalFooter").html("");$("#addThread").on("hidden.bs.modal", () =>  location.reload() );},
-        error: () => {var error = "<div class='text-center'><span class='glyphicon glyphicon-remove' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>错误-发生内部错误，请刷新后再试</p>";
-    $("#modalContent").html(error); $("#modalFooter").html("");$("#addThread").on("hidden.bs.modal", () =>  location.reload() );}
+        success: function()  {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>成功发送讨论串</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
+        $("#modalContent").html(success); $("#modalFooter").html("");$("#addThread").on("hidden.bs.modal", function() {  location.reload() });},
+        error: function()  {var error = "<div class='text-center'><span class='glyphicon glyphicon-remove' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>错误-发生内部错误，请刷新后再试</p>";
+    $("#modalContent").html(error); $("#modalFooter").html("");$("#addThread").on("hidden.bs.modal", function()  { location.reload() });}
     })};
 </script>
     {/bodyContent}

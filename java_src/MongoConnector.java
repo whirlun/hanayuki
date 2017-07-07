@@ -23,6 +23,7 @@ import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Projections;
 import org.bson.types.Binary;
 
+
 public class MongoConnector {
     private MongoDatabase mdb;
     public MongoConnector(String databaseName) throws Exception {
@@ -109,6 +110,20 @@ public class MongoConnector {
         result.put("thread", threadResult);
         result.put("username", userResult);
         return result;
+    }
+
+ public List<String> activities(String setname, OtpErlangList keys, OtpErlangList values) throws Exception {
+        List<Document> results = new ArrayList<>();
+        MongoCollection<Document> collection = mdb.getCollection(setname);
+        String username = ((String)convert2Java(values.elementAt(0)));
+        int page = ((Long)convert2Java(values.elementAt(1))).intValue();
+        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(match(Filters.eq("username", username)), project(fields(include("threads"),excludeId()))));
+        for(Document doc:result) {
+            results.add(doc);
+        }
+        List<String> resultList = (results.get(0)).get("threads");
+        List<String> sublist = resultList.subList(((page-1)*9), (page*9));
+        return sublist;
     }
 
     private enum OtpTypes {

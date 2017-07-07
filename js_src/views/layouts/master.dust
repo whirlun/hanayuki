@@ -9,9 +9,10 @@
     <meta name="author" content="">
 
      <script src="https://cdn.bootcss.com/moment.js/2.2.1/moment+langs.min.js"></script>
+     <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
      <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
      <link href="https://cdn.bootcss.com/normalize/7.0.0/normalize.min.css" rel="stylesheet">
-     <link href="css/main.css" rel="stylesheet">
+     <link href="/css/main.css" rel="stylesheet">
  <style>
       /* note: this is a hack for ios iframe for bootstrap themes shopify page */
       /* this chunk of css is not part of the toolkit :) */
@@ -49,13 +50,13 @@
         <li>
         </li>
         {#loginStatus}
-        {#userinfo}<img class="user-avatar" href="/img/{avatar}"><p>{nickname}</p></img>{/userinfo}
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-          <span class="caret"></span></a>
+        <li id="user-dropdown" class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{#userinfo}<img class="user-avatar" src="/img/avatar/{avatar}" />{/userinfo}
+          </span></a>
           <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
+            <li><a href="#">{#userinfo}{nickname}{/userinfo}</a></li>
+            <li role="seperator" class="divider"></li>
+            {#userinfo}<li><a href="/userhome/{username}">个人设定</a></li>{/userinfo}
             <li><a href="#">Something else here</a></li>
             <li role="separator" class="divider"></li>
             <li><a href="javascript:void(0)" onclick="logout()">登出</a></li>
@@ -77,10 +78,9 @@
 </nav>
 {/navbar}
 {+bodyContent/}
-<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/tether/1.4.0/js/tether.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="js/jquery.serializejson.min.js"></script>
+<script src="/js/jquery.serializejson.min.js"></script>
 
 <div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="loginModal" >
   <div class="modal-dialog" role="document">
@@ -176,51 +176,51 @@
   </div>
 </div>
 <script>
-    let register = () => {$.ajax({
+    var register = function()  {$.ajax({
         type: 'POST',
         contentType: 'application/json',
         url: '/user/register',
         data: JSON.stringify($("#registerForm").serializeJSON()),
-        success: () => {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>注册成功</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
-        $("#registerContent").html(success); $("#registerFooter").html("");$("#register").on("hidden.bs.modal", () =>  location.reload() );},
-        error: (msg) => {var error = {"1":"用户名或昵称必须填写，且长度不能超过40字符哟", "2":"哎呀，密码长度要在8至20字符之间才行",
+        success: function()  {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>注册成功</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
+        $("#registerContent").html(success); $("#registerFooter").html("");$("#register").on("hidden.bs.modal", function() {location.reload()} );},
+        error: function(msg) {var error = {"1":"用户名或昵称必须填写，且长度不能超过40字符哟", "2":"哎呀，密码长度要在8至20字符之间才行",
         "3": "电邮地址输入有误哦，再看看吧", "4": "看来有人先你一步抢占了这个用户名哦，换一个吧", "5": "这个电邮地址已经用过了，不能再用了哦", "6": "用户名不能为纯数字，加点别的吧"};
           var jsonData = JSON.parse(msg['responseText']);
          var err =error[jsonData['errorcode']];$("#warning-message").html(err);$("#register-warning").css("display","block")}
     })};
-    let login = () => {
+    var login = function()  {
       $.ajax({
         type: 'POST',
         contentType: 'application/json',
         url: '/user/login',
         data: JSON.stringify($("#loginForm").serializeJSON()),
-        success: () => {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>登陆成功</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
-        $("#loginContent").html(success); $("#loginFooter").html("");$("#login").on("hidden.bs.modal", () =>  location.reload() );},
-        error: (msg) => {var error = {"1":"没找到这个用户，再检查检查用户名吧","2":"密码有错哦，重新输一遍试试"};
+        success: function()  {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>登陆成功</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
+        $("#loginContent").html(success); $("#loginFooter").html("");$("#login").on("hidden.bs.modal", function() {location.reload() });},
+        error: function(msg) {var error = {"1":"没找到这个用户，再检查检查用户名吧","2":"密码有错哦，重新输一遍试试"};
           var jsonData = JSON.parse(msg['responseText']);
          var err =error[jsonData['errorcode']];$("#login-warning-message").html(err);$("#login-warning").css("display","block")}
     })};
-    let checkUsername = () => {
-      let jsonData = {"username": $("#username").val()};
+    var checkUsername = function()  {
+      var jsonData = {"username": $("#username").val()};
       $.ajax({
       type: 'POST',
       contentType: 'application/json',
       url: '/user/checkusername',
       data: JSON.stringify(jsonData),
-      success: (repeat) => {var jsondata = JSON.parse(repeat);if(jsondata['repeat']){ $('#repeat').html("用户名重复").css('color', 'red')}
+      success: function(repeat) {var jsondata = JSON.parse(repeat);if(jsondata['repeat']){ $('#repeat').html("用户名重复").css('color', 'red')}
         else {$('#repeat').html("用户名可用").css('color', 'green') }}
     })};
-    let logout = () => {
-      let jsonData = {"logout":true, "_csrf": "{csrf}"};
+    var logout = function()  {
+      var jsonData = {"logout":true, "_csrf": "{csrf}"};
       $.ajax({
         type: 'POST',
         contentType: 'application/json',
         url: 'user/logout',
         data:JSON.stringify(jsonData),
-        success: () => {location.reload()}
+        success: function()  {location.reload()}
       })
     };
-    let showpassword = () => {
+    var showpassword = function()  {
       if ($("#showpassword").attr("data-show") == "true") {
         $("#password").attr("type", "password");
         $("#showpassword").html("显示密码");

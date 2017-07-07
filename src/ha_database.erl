@@ -3,6 +3,7 @@
 %%API
 -export([insert/3, remove/3, find/3, update/4, latest_thread/2, prepare_cache/3]).
 
+%-define(DEFAULT_NODE, lists:concat(['javaNode@', gethostname()])).
 -define(DEFAULT_NODE, 'javaNode@BBrabbit-surface').
 
 insert(Setname, Keys, Values) ->
@@ -36,4 +37,15 @@ prepare_cache(Index, Offset, UserTime) ->
     case Status of
         error -> {error, Result};
         ok -> Result
+end.
+
+activities(Username, Page) ->
+    {Status, Result} = ha_mongo_activities(?DEFAULT_NODE, user, [], [Username, Page]),
+    case Status of
+        error -> {error, Result};
+        ok -> Result
     end.
+
+gethostname() ->
+    {ok, Hostname} = inet:gethostname(),
+    Hostname.

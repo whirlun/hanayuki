@@ -7,6 +7,7 @@ import com.ericsson.otp.erlang.*;
 import org.bson.AbstractBsonReader.State;
 import org.bson.*;
 import org.bson.json.JsonReader;
+import org.bson.types.ObjectId;
 
 public class MongoTask implements Runnable {
     private OtpMbox mbox;
@@ -33,7 +34,7 @@ public class MongoTask implements Runnable {
     }
 
     private enum actions {
-        INSERT, REMOVE, FIND, UPDATE, LATESTTHREAD, PREPARECACHE;
+        INSERT, REMOVE, FIND, UPDATE, LATESTTHREAD, PREPARECACHE,ACTIVITIES;
     }
 
     public void run() {
@@ -57,6 +58,8 @@ public class MongoTask implements Runnable {
                     break;
                 case PREPARECACHE:
                     doPrepareCache();
+                case ACTIVITIES:
+                    doActivities();
             }}catch (Exception e){
             OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
                     new OtpErlangAtom("reply"), new OtpErlangAtom("error"), ref
@@ -69,9 +72,9 @@ public class MongoTask implements Runnable {
 
 
     private void doInsert() throws Exception {
-        conn.insert(setname, keys, values);
+        ObjectId id = conn.insert(setname, keys, values);
         OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
-                new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), ref
+                new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), new OtpErlangString(id.toHexString()),ref
         });
         mbox.send(from, reply);
     }
@@ -155,11 +158,25 @@ public class MongoTask implements Runnable {
         erlangResult.toArray(erlangArray);
         OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
                 new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), new OtpErlangTuple(erlangArray), ref
-        });        
+        });
         mbox.send(from, reply);
     }
 
-        private enum JavaTypes {
+    private void doActivities() throws Exception {
+        ArrayList<OtpErlangObject> arrayList = new ArrayList<>();
+        List<Document> result;
+        result = conn.activities(setname, keys, values);
+        for (Document doc : result) {
+            arrayList.add(java2Erlang(doc));
+        }
+        OtpErlangObject[] erlangArray = new OtpErlangObject[arrayList.size()];
+        arrayList.toArray(erlangArray);
+        OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[]{
+                new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), new OtpErlangList(erlangArray), ref
+        });
+        mbox.send(from, reply);
+    }
+    private enum JavaTypes {
         STRING, DOUBLE, FLOAT, INTEGER, LONG, LIST, DOCUMENT, ARRAYLIST;
     }
 
@@ -241,38 +258,38 @@ public class MongoTask implements Runnable {
                 arrayList.add(new OtpErlangAtom(fieldName));
 
                 switch (reader.getCurrentBsonType()) {
-                        case INT32:
-                            arrayList.add(new OtpErlangInt(reader.readInt32()));
-                            break;
-                        case INT64:
-                            arrayList.add(new OtpErlangLong(reader.readInt64()));
-                            break;
-                        case STRING:
-                            arrayList.add(new OtpErlangString(reader.readString()));
-                            break;
-                        case DOUBLE:
-                            arrayList.add(new OtpErlangDouble(reader.readDouble()));
-                            break;
-                        case BOOLEAN:
-                            arrayList.add(new OtpErlangBoolean(reader.readBoolean()));
-                            break;
-                        case OBJECT_ID:
-                            arrayList.add(new OtpErlangString(reader.readObjectId().toHexString()));
-                            break;
-                        case TIMESTAMP:
-                            arrayList.add(new OtpErlangInt(reader.readTimestamp().getTime()));
-                            break;
-                        case UNDEFINED:
-                            arrayList.add(new OtpErlangAtom("nil"));
-                            break;
-                        case BINARY:
-                            arrayList.add(new OtpErlangBinary(reader.readBinaryData().getData()));
-                            break;
-                        case ARRAY:
-                            arrayList.add(java2Erlang((ArrayList)javaTerm.get(fieldName)));
-                            break;
-                        case DOCUMENT:
-                            arrayList.add(java2Erlang((Document) javaTerm.get(fieldName)));
+                    case INT32:
+                        arrayList.add(new OtpErlangInt(reader.readInt32()));
+                        break;
+                    case INT64:
+                        arrayList.add(new OtpErlangLong(reader.readInt64()));
+                        break;
+                    case STRING:
+                        arrayList.add(new OtpErlangString(reader.readString()));
+                        break;
+                    case DOUBLE:
+                        arrayList.add(new OtpErlangDouble(reader.readDouble()));
+                        break;
+                    case BOOLEAN:
+                        arrayList.add(new OtpErlangBoolean(reader.readBoolean()));
+                        break;
+                    case OBJECT_ID:
+                        arrayList.add(new OtpErlangString(reader.readObjectId().toHexString()));
+                        break;
+                    case TIMESTAMP:
+                        arrayList.add(new OtpErlangInt(reader.readTimestamp().getTime()));
+                        break;
+                    case UNDEFINED:
+                        arrayList.add(new OtpErlangAtom("nil"));
+                        break;
+                    case BINARY:
+                        arrayList.add(new OtpErlangBinary(reader.readBinaryData().getData()));
+                        break;
+                    case ARRAY:
+                        arrayList.add(java2Erlang((ArrayList)javaTerm.get(fieldName)));
+                        break;
+                    case DOCUMENT:
+                        arrayList.add(java2Erlang((Document) javaTerm.get(fieldName)));
 
                 }
             }

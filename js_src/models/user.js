@@ -29,5 +29,28 @@ module.exports = local = {
 		let request = {"module": "ha_user", "function": "login", "arg": [username, password]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
-	} 
+	},
+	userpage: function(username, callback) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) => {
+			let reply = "" + data;
+			callback(reply);
+			client.end();
+		})
+		let request = {"module": "ha_user", "function":"userpage", "arg": [username]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);
+	},
+	activities: function(threads,callback) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) =>
+		{
+			let reply = "" + data;
+			callback(reply);
+			client.end();
+		})
+		let request = {"module": "ha_user", "function": "activities", "arg": [threads]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);
+	}
 }

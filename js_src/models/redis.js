@@ -5,8 +5,19 @@ let net = require('net');
 let HOST = "127.0.0.1";
 let PORT = 2333;
 let prefix = "ha_"
-var local;
-var redisPassword = "1zHyBRMvAVA@s@%bu3Z"
+let local;
+
+let getClient = () => {
+  let client = redis.createClient(6379, '127.0.0.1', {"password":"1zHyBRMvAVA@s@%bu3Z"});
+  global.redisInUse = true;
+  client.on("error", (err) =>{
+    console.log("Error" + err);
+    global.redisInUse = false;});
+    return client;
+}
+
+let client = getClient();
+let redisPassword = "1zHyBRMvAVA@s@%bu3Z"
 exports.init = () => {
     global.redisInUse = false;
     let client = redis.createClient(6379, '127.0.0.1', {"password":redisPassword});
@@ -42,11 +53,15 @@ exports.init = () => {
     netclient.write(buf);
 }
 
-exports.getClient = () => {
-  let client = redis.createClient(6379, '127.0.0.1', {"password":"1zHyBRMvAVA@s@%bu3Z"});
-  global.redisInUse = true;
-  client.on("error", (err) =>{
-    console.log("Error" + err);
-    global.redisInUse = false;});
-    return client;
+
+exports.checkUsername = (username) => {client.sismember(prefix + "usernames", username, (err, reply) =>{
+        if(reply) {
+        return true;
+    }
+    else {
+      return false;
+    }
+})
 }
+
+exports.register = (username) => {client.sadd(prefix + "usernames", username);}

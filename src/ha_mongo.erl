@@ -12,8 +12,8 @@ insert(Node, Setname, Keys, Values) ->
     Ref = make_ref(),  
     {mongo_server, Node} ! {insert, self(), Ref,Setname, Keys, Values},
     receive
-        {reply, ok, Ref} ->
-        ok;
+        {reply, ok, Id, Ref} ->
+        {ok, Id};
         {reply, error, Ref} ->
         {error, internalerror}
     after 3000 ->
@@ -79,3 +79,15 @@ prepare_cache(Node, Setname, Keys, Values) ->
     after 30000 ->
         {error, timeout}
     end.
+
+activities(Node, Setname, Keys, Values) ->
+    Ref = make_ref(),
+    {mongo_server, Node} ! {activities, self(), Ref, Setname, Keys, Values},
+    receive
+        {reply, ok, Result, Ref} ->
+            {ok, Result};
+        {reply, error, Ref} ->
+            {error, internalerror}
+    after 3000 ->
+        {error, timeout}
+    end. 

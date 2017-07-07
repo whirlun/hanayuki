@@ -82,7 +82,8 @@ handle_call({addthread, Title, Content, Username, Category, Accesslevel}, _From,
 	Result = ha_database:insert('thread', [title, content, read, reply, username, category, rtotal, time, loves, lock, accesslevel],
 	[Title, Content, 0, [], Username, Category, 0, 1000000*M+S, 0, false, Accesslevel]),
 	case Result of
-		ok ->
+		{ok, Id} ->
+		ha_database:update('user', [username, threads], [Username, Id], "$push"),
 		{reply, State#state{data=ok}, State};
 		{error, _}->
 		{reply, State#state{data=error}, State}
@@ -128,5 +129,5 @@ user_jsonify([H|T], Result) ->
 	user_jsonify(T, [H1| Result]).
 
 login_jsonify(T) ->
-	{{_id,Id,_,_,_,_,nickname,Nickname,_,_,_,_,_,_,_,_,_,_,avatar,Avatar,_,_,_,_,_,_,_,_,_,_,_,_}} = T,
-	{[{id, list_to_binary(Id)}, {nickname, list_to_binary(Nickname)}, {avatar, list_to_binary(Avatar)}]}.
+	{{_id,Id,username,Username,_,_,nickname,Nickname,_,_,_,_,_,_,_,_,_,_,avatar,Avatar,_,_,_,_,_,_,_,_,_,_,_,_,_,_}} = T,
+	{[{id, list_to_binary(Id)}, {username, list_to_binary(Username)},{nickname, list_to_binary(Nickname)}, {avatar, list_to_binary(Avatar)}]}.
