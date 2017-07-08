@@ -58,8 +58,10 @@ public class MongoTask implements Runnable {
                     break;
                 case PREPARECACHE:
                     doPrepareCache();
+                    break;
                 case ACTIVITIES:
                     doActivities();
+                    break;
             }}catch (Exception e){
             OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
                     new OtpErlangAtom("reply"), new OtpErlangAtom("error"), ref

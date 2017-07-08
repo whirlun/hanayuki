@@ -41,7 +41,7 @@ module.exports = local = {
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
 	},
-	activities: function(threads,callback) {
+	activities: function(threads,username, page, callback) {
 		let client = new net.Socket().connect(PORT, HOST);
 		client.on('data', (data) =>
 		{
@@ -49,7 +49,7 @@ module.exports = local = {
 			callback(reply);
 			client.end();
 		})
-		let request = {"module": "ha_user", "function": "activities", "arg": [threads]};
+		let request = {"module": "ha_user", "function": "activities", "arg": [username, page]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
 	}

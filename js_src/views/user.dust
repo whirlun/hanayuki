@@ -30,55 +30,10 @@
 </div>
 {/userinfo}
 <script>
-    var activities = function(nowpage) {
-        var page;
-        var csrf = "{csrf}";
-        nowpage? page = nowpage : page = 1;
-        var threads = window.localStorage.userinfo['threads'];
-        var jsonData = {
-            "threads":threads.slice((page-1)*7,page*7) ,
-            "page": page,
-            "_csrf": csrf 
-        };
-        var activity_menu = ['帖子', '回复', '赞过的', '收藏'];
-        for (var i = 0;i < activity_menu.length;i++) {
-            $("#user-menu").append('<li><a href="javascript:void(0)" hover-word="'+activity_menu[i]+'onclick="activities()">'+activity_menu[i]+"</li>");
-        }
-        {#userinfo}
-        $.ajax({
-            type: 'POST',
-            contentType: 'application/json',
-            url: '/userhome/'+"{username}"+'/activities',
-            data: JSON.stringify(jsonData),
-            success: function(data) {var jsondata = JSON.parse(data);$("#user-detail-data").append("<ul id='thread-data'></ul>");
-            for(var i = 0; i < jsondata.length; i++) {
-                $("#thread-data").append("<li id='thread"+i+"'></li>").append("<p class='user-thread-title'>"+jsondata[i]['title']+"</p>");
-                if(jsondata[i]['lock']) {
-                    $("#thread"+i).append("<span class='glyphicons glyphicons-lock'></span>");
-                }
-                $("#thread"+i).append("<ul class='list-inline user-thread-status'><li><span class='glyphicons glyphicons-eye-open'></span>"+jsonData[i]['read']+"</li>"+
-                "<li><span class='glyphicons glyphicons-comments'></span>"+jsonData[i]['rtotal']+"</li>");
-                $("#thread"+i).append("<p class='thread-content'>"+jsondata[i]['content'].substr(0,100)+"</p>");
-            }
-            var pages = jsondata['page'];
-            $("#user-detail-data").append("<a class='user-page-seperator' href='javacript:void(0)' onclick='activities(-1)' >上一页</a>");
-            if(pages > 9) {
-                for(var k = 0; k < 8; k++){
-            $("#user-detail-data").append("<a class='user-page-seperator' href='javascript:void(0)' onclick='activities("+k+")'>"+k+"</a>");
-                }
-            $('#user-detail-data').append("<a class='user-page-seperator' href='javascript:void(0)' onclick='activities(0)'>下一页</a>");
-            }
-            else {
-                for(var k = 0; k < pages; k++) {
-            $("#user-detail-data").append("<a class='user-page-seperator' href='javascript:void(0)' onclick='activities(k)'>"+k+"</a>");                    
-                }
-            $('#user-detail-data').append("<a class='user-page-seperator' href='javascript:void(0)' onclick='activities(0)'>下一页</a>");
-            }
-            }
-        })
+    var activities = function(page) {
+        
     }
 </script>
-{/userinfo}
 {/bodyContent}
 
 </body>

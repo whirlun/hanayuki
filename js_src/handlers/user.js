@@ -111,9 +111,9 @@ exports.userpage = (req, res) => {
 }
 
 exports.activities = (req, res) => {
-    let threads = req.body.threads;
+    let username = req.params.username;
     let page = req.body.page;
-    User.activities(threads, (model) =>
+    User.activities(username, page, (model) =>
     {
         let stringed = JSON.parse(model);
         let viewModel = JSON.parse(stringed);

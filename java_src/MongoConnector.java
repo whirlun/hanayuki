@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.Document;
@@ -22,6 +23,8 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Projections;
 import org.bson.types.Binary;
+import org.bson.AbstractBsonReader;
+import org.bson.json.JsonReader;
 
 
 public class MongoConnector {
@@ -36,7 +39,7 @@ public class MongoConnector {
         }
     }
 
-    public void insert(String setname,OtpErlangList keys,OtpErlangList values) throws Exception{
+    public ObjectId insert(String setname,OtpErlangList keys,OtpErlangList values) throws Exception{
         Document document = new Document();
         for(int i = 0; i <keys.arity(); i++){
             OtpErlangObject key = keys.elementAt(i);
@@ -45,6 +48,9 @@ public class MongoConnector {
         }
         MongoCollection<Document> collection = mdb.getCollection(setname);
         collection.insertOne(document);
+        ObjectId id = document.getObjectId("_id");
+        return id;
+
     }
 
     public void remove(String setname,OtpErlangList keys,OtpErlangList values) throws Exception{
@@ -102,8 +108,8 @@ public class MongoConnector {
         MongoCollection<Document> userCollection = mdb.getCollection(setname);
         int userTime = ((Long)convert2Java(values.elementAt(2))).intValue();
         threadResult = latestThread("thread", keys, values);
-        AggregateIterable<Document> rawUserResult = userCollection.aggregate(Arrays.asList(match(Filters.gte("registertime", userTime)), 
-                                                                                            project(fields(include("username", "email")))));
+        AggregateIterable<Document> rawUserResult = userCollection.aggregate(Arrays.asList(match(Filters.gte("registertime", userTime)),
+                project(fields(include("username", "email")))));
         for(Document doc:rawUserResult) {
             userResult.add(doc);
         }
@@ -112,19 +118,47 @@ public class MongoConnector {
         return result;
     }
 
- public List<String> activities(String setname, OtpErlangList keys, OtpErlangList values) throws Exception {
+    public List<Document> activities(String setname, OtpErlangList keys, OtpErlangList values) throws Exception {
         List<Document> results = new ArrayList<>();
         MongoCollection<Document> collection = mdb.getCollection(setname);
-        String username = ((String)convert2Java(values.elementAt(0)));
-        int page = ((Long)convert2Java(values.elementAt(1))).intValue();
-        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(match(Filters.eq("username", username)), project(fields(include("threads"),excludeId()))));
-        for(Document doc:result) {
+        String username = ((String) convert2Java(values.elementAt(0)));
+        int page = ((Long) convert2Java(values.elementAt(1))).intValue();
+        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(match(Filters.eq("username", username)), project(fields(include("threads"), excludeId()))));
+        for (Document doc : result) {
             results.add(doc);
         }
-        List<String> resultList = (results.get(0)).get("threads");
-        List<String> sublist = resultList.subList(((page-1)*9), (page*9));
-        return sublist;
+        int startIndex, endIndex;
+        List<String> resultList = ((List<String>)(results.get(0)).get("threads"));
+        startIndex = ((page - 1) * 9) < resultList.size() ? ((page - 1) * 9) : 0;
+        if (page * 9 > resultList.size()) {
+            if (resultList.size() > 9) {
+                endIndex = 9;
+            } else {
+                endIndex = resultList.size();
+            }
+        }
+        else {
+            endIndex = page*9;
+        }
+
+        List<String> sublist = resultList.subList(startIndex, endIndex);
+        results = activitiesHelper(sublist);
+        return results;
     }
+
+    private List<Document> activitiesHelper(List<String> aList) {
+        MongoCollection<Document> collection = mdb.getCollection("thread");
+        ArrayList<Document> results = new ArrayList<>();
+        for(String id:aList) {
+            FindIterable<Document> findIterable = collection.find(Filters.eq("_id", new ObjectId(id)));
+            for(Document doc:findIterable) {
+                results.add(doc);
+            }
+        }
+        return results;
+    }
+
+
 
     private enum OtpTypes {
         OTPERLANGATOM, OTPERLANGBYTE, OTPERLANGCHAR, OTPERLANGDOUBLE, OTPERLANGFLOAT,
@@ -192,7 +226,7 @@ public class MongoConnector {
     private Binary convert2Java(OtpErlangBinary erlangObject) throws Exception {
         byte[] binaryData = erlangObject.binaryValue();
         return new Binary(binaryData);
-        
+
     }
     private Float convert2Java(OtpErlangFloat erlangObject) throws Exception {
         return (Float)erlangObject.floatValue();

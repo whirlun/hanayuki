@@ -6,7 +6,7 @@
 
 -module(ha_mongo).
 
--export([insert/4, remove/4, update/5, find/4, latest_thread/4, prepare_cache/4]).
+-export([insert/4, remove/4, update/5, find/4, latest_thread/4, prepare_cache/4, activities/4]).
 
 insert(Node, Setname, Keys, Values) ->
     Ref = make_ref(),  

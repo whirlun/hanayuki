@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, register/4, login/2, userpage/1, activities/1]).
+-export ([start_link/0, register/4, login/2, userpage/1, activities/2]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -68,8 +68,8 @@ userpage(Username) ->
 %%@End
 %%---------------------------------------------------------------------
 
-activities(Threads) ->
-    Reply = gen_server:call(?SERVER, {activities, Threads}),
+activities(Username, Page) ->
+    Reply = gen_server:call(?SERVER, {activities, Username, Page}),
     {ok, Reply}.
 
 %%%====================================================================
@@ -109,9 +109,9 @@ handle_call({userpage, Username}, _From, State) ->
         {_} -> {reply, State#state{data={[{userinfo, userpage_jsonify(Result)}]}}, State}
     end;
 handle_call({activities, Username, Page}, _From, State) ->
-     = ha_database:activities(user, Username, Page),
-    Thread_list = [ha_database:find(user, ['_id'],[T])|| T <- Threads],
-    {reply, State#state{data={[{threads, Thread_list}]}}, State}.
+    Thread_list = ha_database:activities(user, Username, Page),
+    Result = activities_jsonify(Thread_list, []),
+    {reply, State#state{data={[{threads, Result}]}}, State}.
     
 
 handle_cast(stop, State) ->
@@ -170,10 +170,15 @@ settings_jsonify(Settings) ->
     {lovenotice, Lovenotice}, {watchlist, lists_to_binary(Watchlist,[])}, {tracelist, lists_to_binary(Tracelist,[])}, {watchcat, lists_to_binary(Watchcat,[])}, 
     {watchtag,lists_to_binary(Watchtag,[])}, {tracetag, lists_to_binary(Tracetag,[])}, {newpage, Newpage}, {background, list_to_binary(Background)}, {cardbackground, list_to_binary(Cardbackground)}]}.
 
-activities_jsonify([], R) ->
-    R;
-activities_jsonify([H|T], R) ->
-    {}
+activities_jsonify([], Result) ->
+	Result1 = lists:reverse(Result),
+	Result1;
+activities_jsonify([H|T], Result) ->
+	{'_id',Id,title,Title,content,Content,read,Read,reply,_,username, Username, 
+	category, Category, rtotal, Rtotal, time, Time, loves, 
+	Loves, lock, Lock, accesslevel,Accesslevel} = H,
+	H1 = {[{title, list_to_binary(Title)},{id, list_to_binary(Id)}, {content, list_to_binary(Content)}, {read, Read}, {reply, Rtotal}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {time, Time}, {loves, Loves}, {lock, list_to_binary(Lock)}, {accesslevel, Accesslevel}]},
+	activities_jsonify(T, [H1| Result]).
 
 lists_to_binary([], R) ->
     R;
