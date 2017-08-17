@@ -4,7 +4,7 @@
 -export([insert/3, remove/3, find/3, update/4, latest_thread/2, prepare_cache/3, activities/2]).
 
 %-define(DEFAULT_NODE, lists:concat(['javaNode@', gethostname()])).
--define(DEFAULT_NODE, 'javaNode@BBrabbit-surface').
+-define(DEFAULT_NODE, 'javaNode@bbrabbitsurface').
 
 insert(Setname, Keys, Values) ->
     Result = ha_mongo:insert(?DEFAULT_NODE, Setname, Keys, Values),

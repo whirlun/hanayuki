@@ -22,6 +22,7 @@ exports.register = (req, res) => {
                         User.register(username, password, nickname, email, (model) => {
                         let stringed = JSON.parse(model);
 		                let viewModel = JSON.parse(stringed);
+                        if (viewModel == "error") res.sendStatus(500);
                         if(viewModel['error'] == 'repeatusername') {
                             res.writeHead(400, {});
                             let jsonData = {"errorcode": 4};
@@ -104,6 +105,7 @@ exports.userpage = (req, res) => {
         {
             let stringed = JSON.parse(model);
             let viewModel = JSON.parse(stringed);
+            if (viewModel == "error") res.sendStatus(500);
             viewModel.csrf = req.csrfToken();
             res.render('user', viewModel);  
         })
@@ -117,8 +119,9 @@ exports.activities = (req, res) => {
     {
         let stringed = JSON.parse(model);
         let viewModel = JSON.parse(stringed);
+        if(viewModel == "error") res.sendStatus(500);
         viewModel.page = page;
-        res.send(viewModel);
+        res.send(JSON.stringify(viewModel));
     })
 }
 

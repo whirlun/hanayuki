@@ -14,27 +14,79 @@
         <li>等级:{role}</li>
         <li>邮箱:{email}</li>
     </ul>
-<div class="user-detail">
+<div class="user-detail-nav">
 <ul class="list-inline user-detail-btn" aria-label="userDetails">
-    <a href="javascript:void(0)" hover-word="活动" onclick="activities(undefined)"><span>活动</span></button>
-    <a href="javascript:void(0)" hover-word="通知" onclick="notifications()"><span>通知</span></button>
-    <a href="javascript:void(0)" hover-word="私信" onclick="pms()"><span>私信</span></button>
-    <a href="javascript:void(0)" hover-word="徽章" onclick="badges()"><span>徽章</span></button>
-    <a href="javascript:void(0)" hover-word="设置" onclick="settings()"><span>设置</span></button>
+    <li><a href="javascript:void(0)" onclick="activities()" id="activities" class="user-btn"><span>活动</span></a></li>
+    <li><a href="javascript:void(0)" onclick="notifications()" class="user-btn"><span>通知</span></a></li>
+    <li><a href="javascript:void(0)" onclick="pms()" class="user-btn"><span>私信</span></a></li>
+    <li><a href="javascript:void(0)" onclick="badges()" class="user-btn"><span>徽章</span></a></li>
+    <li><a href="javascript:void(0)" onclick="settings()" class="user-btn"><span>设置</span></a></li>
+</ul>
 </div>
+<div class="row">
 <div class="user-detail">
     <ul id="user-menu" class="list-unstyled">
     </ul>
+<div id="user-detail-data">
 </div>
-<div class="user-detail-data">
+</div>
 </div>
 {/userinfo}
+{/bodyContent}
+{#userinfo}
+<script src="/js/jquery.pagination.js"></script>
 <script>
-    var activities = function(page) {
-        
+    var activities = function() {
+        $("#activities").css("border-bottom", "2px solid #82CEF2");
+        var threadcount = {threadcount};
+        if(window.nowpage == undefined) {
+            window.nowpage = 1;
+        }
+        var jsonData = {"page": window.nowpage,
+                        "_csrf": "{csrf}"};
+        var activity_menu = ['帖子', '回复', '赞过的', '收藏'];
+        if($("#user-menu").children().length == 0){
+        for (var i = 0;i < activity_menu.length;i++) {
+            $("#user-menu").append('<li><a href="javascript:void(0)" onclick="activities()">'+activity_menu[i]+"</li>");
+        }
+        }
+        $.ajax({
+      type: 'POST',
+      contentType: 'application/json',
+      url: '/userhome/{username}/activities',
+      data: JSON.stringify(jsonData),
+      success: function(data) {
+          if($('#thread-data')) {
+              $('#user-detail-data').html(null);
+          }
+          var jsondata = JSON.parse(data);$("#user-detail-data").append("<ul id='thread-data'></ul>");
+            for(var i = 0; i < jsondata['threads'].length; i++) {
+                $("#thread-data").append("<li id='thread"+i+"'></li>");
+                $("#thread"+i).append("<p class='user-thread-title'>"+jsondata['threads'][i]['title']+"</p>");
+                if(jsondata['threads'][i]['lock'] == true) {
+                    $("#thread"+i).append("<span class='glyphicons glyphicons-lock'></span>");
+                }
+                $("#thread"+i).append("<ul class='list-inline user-thread-status'><li><span class='glyphicons glyphicons-eye-open'></span>"+jsondata['threads'][i]['read']+"</li>"+
+                "<li><span class='glyphicons glyphicons-comments'></span>"+jsondata['threads'][i]['reply']+"</li>");
+                $("#thread"+i).append("<p class='thread-content'>"+jsondata['threads'][i]['content'].substr(0,100)+"</p>");
+            }
+            $('#user-detail-data').append("<div class='user-pagination'></div>");
+            var totalpage = Math.ceil(threadcount/9);
+            $('.user-pagination').pagination({
+                totalData: threadcount,
+                showData: 9,
+                current: window.nowpage,
+                callback:function(api) {
+                    window.nowpage = api.getCurrent();
+                    activities();
+                }
+            });
+            
+
+            }
+        })
     }
 </script>
-{/bodyContent}
-
+{/userinfo}
 </body>
 </html>

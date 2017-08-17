@@ -12,7 +12,9 @@
      <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
      <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
      <link href="https://cdn.bootcss.com/normalize/7.0.0/normalize.min.css" rel="stylesheet">
+     <link href="/css/pagination.css" media="screen">
      <link href="/css/main.css" rel="stylesheet">
+     <link href="/css/glyphicons.css" rel="stylesheet">
  <style>
       /* note: this is a hack for ios iframe for bootstrap themes shopify page */
       /* this chunk of css is not part of the toolkit :) */
@@ -21,6 +23,7 @@
         min-width: 100%;
         *width: 100%;
       }
+      
     </style>
 
 </head>
@@ -235,7 +238,7 @@
 </script>
 </body>
 {+footer}
-<footer  class="container-fluid foot-wrap" th:fragment="footer">
+<footer  class="container-fluid foot-wrap">
     <p align="center">Hanayuki development version</p></footer>
 {/footer}
 </html>

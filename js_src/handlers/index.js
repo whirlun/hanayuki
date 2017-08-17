@@ -11,6 +11,7 @@ exports.index = (req, res) => {
 	Index.renderIndex(parseInt(index),parseInt(offset), req.session.username, (model) =>
 		{let stringed = JSON.parse(model);
 		let	viewModel = JSON.parse(stringed);
+		if(viewModel == "error") res.sendStatus(500);
 		viewModel.csrf = req.csrfToken();
 		viewModel.loginStatus = (chunk, context, bodies, params) => {
 			if(req.session.username == null) {
@@ -30,6 +31,10 @@ exports.add = (req, res) => {
 	let accesslevel = req.body.accesslevel;
 	let username = req.session.username;
 	Index.addThread(title, content, username, category, accesslevel, (model) =>
-	{res.send(200);
+	{
+		let stringed = JSON.parse(model);
+		let viewModel = JSON.parse(stringed);
+		if (viewModel == "error") res.sendStatus(500);
+		res.sendStatus(200);
 	})
 }

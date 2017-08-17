@@ -129,17 +129,24 @@ public class MongoConnector {
         }
         int startIndex, endIndex;
         List<String> resultList = ((List<String>)(results.get(0)).get("threads"));
+        if (page < 1) page = 1;
         startIndex = ((page - 1) * 9) < resultList.size() ? ((page - 1) * 9) : 0;
+        if (page > 1) {
         if (page * 9 > resultList.size()) {
-            if (resultList.size() > 9) {
-                endIndex = 9;
-            } else {
-                endIndex = resultList.size();
-            }
+            endIndex = resultList.size();
         }
         else {
             endIndex = page*9;
         }
+    }
+    else {
+        if(resultList.size() > 9) {
+            endIndex = 9;
+        }
+        else {
+            endIndex = resultList.size();
+        }
+    }
 
         List<String> sublist = resultList.subList(startIndex, endIndex);
         results = activitiesHelper(sublist);

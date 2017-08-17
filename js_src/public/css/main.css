@@ -13,6 +13,21 @@ a:after{
     color: gray;
 }
 
+body {
+    padding-bottom: 50px;
+}
+
+footer {
+    height: 50px;
+    bottom: 0px;
+    position: fixed;
+    left: 40%;
+}
+
+footer > p {
+    text-align: center;
+}
+
 .navbar-default {
     background-color: transparent;
     border-bottom: 2px solid transparent;
@@ -180,51 +195,64 @@ margin-top:20px;
     border:  none;
 }
 
-.user-detail-btn {
+.user-top img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin-left: 60px;
+    margin-top: 50px;
+    margin-bottom: 70px;
+}
+
+.user-top p {
+    margin-left: 30px;
+    font-size: 35px;
+}
+
+.user-info {
+    margin-top: -10px;
+}
+
+.user-info li {
+    margin: 0 20px 0 20px;
+}
+
+
+.user-btn {
+    margin: 10px 20px 10px 20px;
+    font-size: 25px;
     position: relative;
-    z-index: 1;
+    text-decoration: none;
 }
 
-.user-detail-btn a {
-    overflow: hidden;
-    margin: 5px 15px;
-}
+.user-btn:link,.user-btn:visited,.user-btn:focus{
+            text-decoration:none;
+        }
 
-.user-detail-btn a span {
-    display: block;
-    padding:6 6px 20px;
-    background-color: #009ACD;
-    -webkit-transition: -webkit-transform 0.3s;
-    -moz-transition: -moz-tranisiton 0.3s;
-    transition: 0.3s;
-}
+.user-btn::before{
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            height: 2px;
+            width: 100%;
+            background: #82CEF2;
+            transform: scale(0);
+            transition: all 0.3s;
+        }
+        
+.user-btn:hover::before{
+            transform: scale(1);
+        }
 
-.user-detail-btn a::before {
+
+#user-menu {
     position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    padding: 6px 20px;
-    width: 100%;
-    height: 100%;
-    color: #009ACD;
-    content: attr(hover-word);
-    -webkit-transition: -webkit-transform 0.3s;
-    -moz-transition: -moz-transform 0.3s;
-    transition: transform 0.3s;
-    -webkit-transform: translateX(-25%);
+    width: 20%;
 }
 
-.user-detail-btn a:hover::before,
-.user-detail-btn a:hover::before {
-    -webkit-transform: translateX(0%);
-    -moz-transform: translateX(0%);
-    transform: translateX(0%);
-}
-
-.user-detail-btn a:hover span,
-.user-detail-btn a:focus span {
-    -moz-transform: translateX(100%);
-    -webkit-transform: translateX(100%);
-    transform: translateX(100%);
+#user-detail-data {
+    position: absolute;
+    width:80%;
+    margin-left: 20%;
 }

@@ -109,7 +109,7 @@ handle_call({userpage, Username}, _From, State) ->
         {_} -> {reply, State#state{data={[{userinfo, userpage_jsonify(Result)}]}}, State}
     end;
 handle_call({activities, Username, Page}, _From, State) ->
-    Thread_list = ha_database:activities(user, Username, Page),
+    Thread_list = ha_database:activities(Username, Page),
     Result = activities_jsonify(Thread_list, []),
     {reply, State#state{data={[{threads, Result}]}}, State}.
     
@@ -149,16 +149,17 @@ register_helper(Username, Password, Nickname, Email) ->
     blacklist, [], replythreadmode, trace, lovenotice, true, watchlist, [], tracelist,[], watchcat, [], watchtag, [],
     tracetag, [], newpage, true, background, "", cardbackground, ""}, flase, newbee, []]),
 	case Result of 
-        ok -> 
+        {ok, _} -> 
            ok;
         {error, _} ->
             error
     end.
     
 userpage_jsonify(Userinfo) ->
-    {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,_,_,_,_,signature,Signature,
-    email,Email,avatar,Avatar,_,_,_,_,_,_,_,_,block,Block,role,Role,_,_}} = Userinfo,
-        {[{id,list_to_binary(Id)}, {username,list_to_binary(Username)},{nickname,list_to_binary(Nickname)},{registerTime,Registertime},
+    {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,threads,Threads,_,_,signature,Signature,
+    email,Email,avatar,Avatar,_,_,replies,Replies,_,_,_,_,block,Block,role,Role,_,_}} = Userinfo,
+        {[{id,list_to_binary(Id)}, {username,list_to_binary(Username)},{nickname,list_to_binary(Nickname)},{registertime,Registertime},
+        {threadcount, length(Threads)},{replycount, length(Replies)},
         {signature,list_to_binary(Signature)},{email,list_to_binary(Email)},{avatar,list_to_binary(Avatar)},
         {block,Block},{role,list_to_binary(Role)}]}.
 

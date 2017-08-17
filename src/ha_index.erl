@@ -77,6 +77,7 @@ handle_call({render, Index, Offset, Username},_From, State) ->
 		_ ->EJson = {[{threads, render_jsonify(ThreadResult, [])}, {userinfo, login_jsonify(UserResult)}]}
 	end,
 	{reply, State#state{data = EJson}, State};
+
 handle_call({addthread, Title, Content, Username, Category, Accesslevel}, _From, State) ->
 	{M, S, _} = os:timestamp(),
 	Result = ha_database:insert('thread', [title, content, read, reply, username, category, rtotal, time, loves, lock, accesslevel],
