@@ -32,6 +32,8 @@ init([]) ->
     			permanent, 2000, supervisor, [ha_index]},
 	User_sup = {ha_user_sup, {ha_user_sup, start_link, []},
 				permanent, 2000, supervisor, [ha_user]},
-    Children = [Socket_sup, Index_sup, User_sup],
+	Thread_sup = {ha_thread_sup, {ha_thread_sup, start_link, []},
+				permanent, 2000, supervisor, [ha_thread]},
+    Children = [Socket_sup, Index_sup, User_sup, Thread_sup],
     RestartStrategy = {one_for_one, 0, 1},
     {ok, {RestartStrategy, Children}}.

@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, register/4, login/2, userpage/1, activities/2]).
+-export ([start_link/0, register/4, login/2, userpage/1, activities/2, replies/2]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -54,7 +54,7 @@ login(Username, Password) ->
 
 %%---------------------------------------------------------------------
 %%@doc get user's info
-%%@spec login(Username::String() || atom()) -> {ok, Reply}
+%%@spec userpage(Username::String() || atom()) -> {ok, Reply}
 %%@End
 %%---------------------------------------------------------------------
 
@@ -64,7 +64,7 @@ userpage(Username) ->
 
 %%---------------------------------------------------------------------
 %%@doc get user activities by default option of threads
-%%@spec login(Threads::List()) -> {ok, Reply}
+%%@spec activities(Username::String() || atom(), Page::Integer()) -> {ok, Reply}
 %%@End
 %%---------------------------------------------------------------------
 
@@ -72,6 +72,15 @@ activities(Username, Page) ->
     Reply = gen_server:call(?SERVER, {activities, Username, Page}),
     {ok, Reply}.
 
+%%---------------------------------------------------------------------
+%%@doc get user replies
+%%@spec login(Threads::List()) -> {ok, Reply}
+%%@End
+%%---------------------------------------------------------------------
+
+replies(Username, Page) ->
+    Reply = gen_server:call(?SERVER, {replies, Username, Page}),
+    {ok, Reply}.
 %%%====================================================================
 %%% callbacks
 %%%====================================================================
@@ -111,7 +120,11 @@ handle_call({userpage, Username}, _From, State) ->
 handle_call({activities, Username, Page}, _From, State) ->
     Thread_list = ha_database:activities(Username, Page),
     Result = activities_jsonify(Thread_list, []),
-    {reply, State#state{data={[{threads, Result}]}}, State}.
+    {reply, State#state{data={[{threads, Result}]}}, State};
+handle_call({replies, Username, Page}, _From, State) ->
+    Reply_list = ha_database:replies(Username, Page),
+    Result = replies_jsonify(Reply_list, []),
+    {reply, State#state{data={[{replies, Result}]}}, State}.
     
 
 handle_cast(stop, State) ->
@@ -181,9 +194,18 @@ activities_jsonify([H|T], Result) ->
 	H1 = {[{title, list_to_binary(Title)},{id, list_to_binary(Id)}, {content, list_to_binary(Content)}, {read, Read}, {reply, Rtotal}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {time, Time}, {loves, Loves}, {lock, list_to_binary(Lock)}, {accesslevel, Accesslevel}]},
 	activities_jsonify(T, [H1| Result]).
 
+replies_jsonify([], Result) ->
+    Result1 = lists:reverse(Result),
+    Result1;
+replies_jsonify([H|T], Result) ->
+    {'_id',Id,title,Title,content,Content,read,Read,reply,_,username, Username, 
+    category, Category, rtotal, Rtotal, time, Time, loves, 
+    Loves, lock, Lock, accesslevel,Accesslevel} = H,
+    H1 = {[{title, list_to_binary(Title)},{id, list_to_binary(Id)}, {content, list_to_binary(Content)}, {read, Read}, {reply, Rtotal}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {time, Time}, {loves, Loves}, {lock, list_to_binary(Lock)}, {accesslevel, Accesslevel}]},
+    activities_jsonify(T, [H1| Result]).
+
 lists_to_binary([], R) ->
     R;
 lists_to_binary([H|T], R) ->
     H1 = list_to_binary(H),
 	lists_to_binary(T, [H1|R]).
-

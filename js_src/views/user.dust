@@ -39,15 +39,21 @@
     var activities = function() {
         $("#activities").css("border-bottom", "2px solid #82CEF2");
         var threadcount = {threadcount};
-        if(window.nowpage == undefined) {
-            window.nowpage = 1;
+        if(window.threadnowpage == undefined) {
+            window.threadnowpage = 1;
         }
-        var jsonData = {"page": window.nowpage,
+        var jsonData = {"page": window.threadnowpage,
                         "_csrf": "{csrf}"};
         var activity_menu = ['帖子', '回复', '赞过的', '收藏'];
+        var activity_menu_dic = {
+            '帖子' : "threads",
+            '回复' : "replies",
+            '赞过的' : "loved",
+            '收藏' : 'starred'
+        };
         if($("#user-menu").children().length == 0){
         for (var i = 0;i < activity_menu.length;i++) {
-            $("#user-menu").append('<li><a href="javascript:void(0)" onclick="activities()">'+activity_menu[i]+"</li>");
+            $("#user-menu").append('<li><a href="javascript:void(0)" onclick='+activity_menu_dic[activity_menu[i]]+'()>'+activity_menu[i]+"</li>");
         }
         }
         $.ajax({
@@ -59,7 +65,8 @@
           if($('#thread-data')) {
               $('#user-detail-data').html(null);
           }
-          var jsondata = JSON.parse(data);$("#user-detail-data").append("<ul id='thread-data'></ul>");
+          var jsondata = JSON.parse(data);
+          $("#user-detail-data").append("<ul id='thread-data'></ul>");
             for(var i = 0; i < jsondata['threads'].length; i++) {
                 $("#thread-data").append("<li id='thread"+i+"'></li>");
                 $("#thread"+i).append("<p class='user-thread-title'>"+jsondata['threads'][i]['title']+"</p>");
@@ -75,9 +82,9 @@
             $('.user-pagination').pagination({
                 totalData: threadcount,
                 showData: 9,
-                current: window.nowpage,
+                current: window.threadnowpage,
                 callback:function(api) {
-                    window.nowpage = api.getCurrent();
+                    window.threadnowpage = api.getCurrent();
                     activities();
                 }
             });
@@ -85,7 +92,88 @@
 
             }
         })
-    }
+    };
+    var threads = function() {
+        var threadcount = {threadcount};
+        if(window.threadnowpage == undefined) {
+            window.threadnowpage = 1;
+        }
+        var jsonData = {"page": window.threadnowpage,
+                    "_csrf": "{csrf}"};
+         $.ajax({
+      type: 'POST',
+      contentType: 'application/json',
+      url: '/userhome/{username}/activities',
+      data: JSON.stringify(jsonData),
+      success: function(data) {
+          if($('#thread-data')) {
+              $('#user-detail-data').html(null);
+          }
+          var jsondata = JSON.parse(data);
+          $("#user-detail-data").append("<ul id='thread-data'></ul>");
+            for(var i = 0; i < jsondata['threads'].length; i++) {
+                $("#thread-data").append("<li id='thread"+i+"'></li>");
+                $("#thread"+i).append("<p class='user-thread-title'>"+jsondata['threads'][i]['title']+"</p>");
+                if(jsondata['threads'][i]['lock'] == true) {
+                    $("#thread"+i).append("<span class='glyphicons glyphicons-lock'></span>");
+                }
+                $("#thread"+i).append("<ul class='list-inline user-thread-status'><li><span class='glyphicons glyphicons-eye-open'></span>"+jsondata['threads'][i]['read']+"</li>"+
+                "<li><span class='glyphicons glyphicons-comments'></span>"+jsondata['threads'][i]['reply']+"</li>");
+                $("#thread"+i).append("<p class='thread-content'>"+jsondata['threads'][i]['content'].substr(0,100)+"</p>");
+            }
+            $('#user-detail-data').append("<div class='user-pagination'></div>");
+            var totalpage = Math.ceil(threadcount/9);
+            $('.user-pagination').pagination({
+                totalData: threadcount,
+                showData: 9,
+                current: window.threadnowpage,
+                callback:function(api) {
+                    window.threadnowpage = api.getCurrent();
+                    activities();
+                }
+            });
+            }
+        })
+    };
+
+    var replies = function() {
+        var replycount = {replycount};
+        if(window.replynowpage == undefined) {
+            window.replynowpage = 1;
+        }
+        var jsonData = {"page": window.threadnowpage,
+        "_csrf": "{csrf}"};  
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            url: '/userhome/{username}/replies',
+            data: JSON.stringify(jsonData),
+            success: function(data) {
+                if($('#thread-data')) {
+                    $('#user-detail-data').html(null);
+                }
+                var jsondata = JSON.parse(data);
+                $("#user-detail-data").append("<ul id='thread-data'></ul>");
+                for(var i = 0; i < jsondata['threads'].length; i++) {
+                    $("#thread-data").append("<li id='thread' + i + '></li>");
+                    $("#thread" + i).append("<p class='user-thread-title'>" + jsondata['replies'][i]['title'] + "</p>");
+                    $("#thread"+i).append("<p class='thread-content'>"+jsondata['replies'][i]['content'].substr(0,100)+"</p>");
+                }
+                $("#user-detail-data").append("<div class='user-pagination'></div>");
+                var totalpage = Math.ceil(replycount/9);
+                $('.user-pagination').pagination({
+                    totalData:replycount,
+                    showData: 9,
+                    current: window.replynowpage,
+                    callback:function(api) {
+                        window.replynowpage = api.getCurrent();
+                        replies();
+                    }
+                }
+                    );
+                }
+            })
+        }
 </script>
 {/userinfo}
 </body>

@@ -1,8 +1,10 @@
 let index = require('./handlers/index.js');
-let user = require('./handlers/user.js')
+let user = require('./handlers/user.js');
+let thread = require('./handlers/thread.js');
 
 module.exports = (app) => {
 	app.get('/', index.index);
+	app.get('/:threadid', thread.read);
 	app.get('/userhome/:username', user.userpage);
 	app.post('/thread/add', index.add);
 	app.post('/user/register', user.register);
