@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, render_index/3, add_thread/5, prepare_cache/3]).
+-export ([start_link/0, render_index/3, add_thread/5, prepare_cache/3, expand_thread/2]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -61,6 +61,16 @@ add_thread(Title, Content, Username, Category, Accesslevel) ->
 prepare_cache(Index, Offset, Usertime) ->
 	Reply = gen_server:call(?SERVER, {preparecache, Index, Offset, Usertime}),
 	{ok, Reply}.
+
+%%---------------------------------------------------------------------
+%%@doc give nodejs data to render
+%%@spec prepare_cache(ThreadId::String(), Content::String) -> {ok, sent}
+%%@End
+%%---------------------------------------------------------------------
+
+expand_thread(Threadid, Content) ->
+	Reply = gen_server:call(?SERVER, {expandthread, Threadid, Content}),
+	{ok, Reply}.
 %%%====================================================================
 %%% callbacks
 %%%====================================================================
@@ -85,9 +95,17 @@ handle_call({addthread, Title, Content, Username, Category, Accesslevel}, _From,
 	case Result of
 		{ok, Id} ->
 		ha_database:update('user', [username, threads], [Username, Id], "$push"),
-		{reply, State#state{data=ok}, State};
+		{reply, State#state{data={[{status, ok},{threadid, Id}]}}, State};
 		{error, _}->
 		{reply, State#state{data=error}, State}
+	end;
+handle_call({expandthread, Threadid, Content}, _From, State) ->
+	Result = ha_database:expand_thread(Threadid, Content),
+	case Result of
+		{ok, _} ->
+			{reply, State#state{data=ok}, State};
+		{error, _} ->
+			{reply, State#state{data=error}, State}
 	end;
 handle_call({preparecache, Index, Offset, Usertime}, _From, State) ->
 	Result = ha_database:prepare_cache(Index, Offset, Usertime),
@@ -100,9 +118,11 @@ handle_cast(stop, State) ->
 	{stop, normal, State}.
 
 handle_info(timeout, State) ->
+	ha_index_sup:start_child(),
 	{ok, State}.
 
 terminate(_Reason, _State) ->
+	ha_index_sup:start_child(),
 	ok.
 
 code_change(_OldVsn, State, _Extra) ->

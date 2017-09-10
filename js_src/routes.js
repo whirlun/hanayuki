@@ -4,9 +4,10 @@ let thread = require('./handlers/thread.js');
 
 module.exports = (app) => {
 	app.get('/', index.index);
-	app.get('/:threadid', thread.read);
+	app.get('/thread/:threadid', thread.read);
 	app.get('/userhome/:username', user.userpage);
 	app.post('/thread/add', index.add);
+	//app.post('/thread/reply', thread.reply);
 	app.post('/user/register', user.register);
 	app.post('/user/login', user.login)
 	app.post('/user/checkUsername', user.checkUsername);

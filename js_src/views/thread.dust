@@ -1,11 +1,50 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
     {>"./layouts/master" /}
+ <head>
+ {+header}
+ <title>
+ {thread_info.title}
+ </title>
+ {/header}
 <body>
 {<bodyContent}
-{#thread_info}
-	{title}
-{/thread_info}
+<div class="col-md-offset-1 col-md-offset-10 thread-topic">
+<h1 style="margin-left:30px">{thread_info.title}</h1>
+<hr />
+<div class="thread-user-info">
+<img src="/img/avatar/{user_info.avatar}"/>
+<p>{user_info.username}</p>
+</div>
+<p>{thread_info.content}</p>
+</div>
+<div class="thread-reply">
+<div class="thread-user-info">
+</div>
+</div>
 {/bodyContent}
+<script>
+var getreplies = function() {
+	if({thread_info.rtotal} == 0)
+		return;
+	else{
+	var replylist = [{thread_info.reply}];
+	$.ajax({
+		url: '/thread/reply',
+		type: 'POST',
+		dataType: 'application/json',
+		data: {reply: replylist},
+	})
+	.done(function(data) {
+        var jsondata = JSON.parse(data);
+        
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	
+	}
+}
+</script>
 </body>
 </html>

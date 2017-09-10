@@ -131,9 +131,11 @@ handle_cast(stop, State) ->
 	{stop, normal, State}.
 
 handle_info(timeout, State) ->
+    ha_user_sup:start_child(),
 	{ok, State}.
 
 terminate(_Reason, _State) ->
+    ha_user_sup:start_child(),
 	ok.
 
 code_change(_OldVsn, State, _Extra) ->

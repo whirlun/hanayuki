@@ -7,15 +7,27 @@ let PORT = 2333;
 var local;
 
 module.exports = local = {
-	read: function(threadid, callback) {
+	read: function(threadid ,username, callback) {
 		let client = new net.Socket().connect(PORT, HOST);
 		client.on('data', (data) => {
 			let reply = "" + data;
 			callback(reply);
 			client.end();
 	})
-	let request = {"module": "ha_thread", "function": "read_thread", "arg": [threadid]};
+	let request = {"module": "ha_thread", "function": "read_thread", "arg": [threadid, username]};
 	let buf = new Buffer(JSON.stringify(request));
 	client.write(buf);
-}
+	},
+
+	reply: function(threadid, content, username, callback) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) => {
+			let reply = "" + data;
+			callback(reply);
+			client.end()
+		})
+		let request = {"module": "ha_thread", "function": "reply_thread", "arg":[threadid, content, username]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);
+	}
 }

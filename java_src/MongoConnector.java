@@ -153,6 +153,20 @@ public class MongoConnector {
         return results;
     }
 
+public ObjectId expandThread(String setname, OtpErlangList keys, OtpErlangList values) throws Exception{
+    MongoCollection collection = mdb.getCollection(setname);
+    ObjectId id = new ObjectId((String)convert2Java(values.elementAt(0)));
+    String threadContent = (String)convert2Java(values.elementAt(1));
+    FindIterable<Document> findIterable;
+    findIterable = collection.find(Filters.eq("_id", id));
+    for(Document result:findIterable) {
+    String oldContent = result.getString("content");
+    collection.updateMany(Filters.eq("_id", id),
+                new Document("$set", new Document("content", oldContent + threadContent)));
+    }
+    return id;
+    }
+
     private List<Document> activitiesHelper(List<String> aList) {
         MongoCollection<Document> collection = mdb.getCollection("thread");
         ArrayList<Document> results = new ArrayList<>();

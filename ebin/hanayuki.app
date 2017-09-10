@@ -11,7 +11,9 @@
              ha_database,
              ha_mongo,
              ha_user_sup,
-             ha_user
+             ha_user,
+             ha_thread,
+             ha_thread_sup
             ]},
   {registered, [ha_app]},
   {applications, [kernel, stdlib]},

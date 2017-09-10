@@ -32,7 +32,7 @@
 <tbody>
     {#threads}
     <tr>
-<td><a href="{id}">{title}</a></td>
+<td><a href="thread/{id}">{title}</a></td>
     <td>{category}</td>
     <td>{read}/{reply}</td>
     <td>{username}</td>

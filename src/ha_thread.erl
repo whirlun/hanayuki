@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, read_thread/1]).
+-export ([start_link/0, read_thread/2, reply_thread/3]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -38,9 +38,20 @@ start_link() ->
 %%@End
 %%---------------------------------------------------------------------
 
-read_thread(Threadid) ->
-    Reply = gen_server:call(?SERVER, {readthread, Threadid}),
+read_thread(Threadid, Username) ->
+    Reply = gen_server:call(?SERVER, {readthread, Threadid, Username}),
     {ok, Reply}.
+
+%%---------------------------------------------------------------------
+%%@doc give nodejs data to render
+%%@spec read_thread(Threadid::Strings(), Content::String(), Username::Atom()||String()) -> {ok, sent}
+%%@End
+%%---------------------------------------------------------------------
+
+reply_thread(Threadid, Content, Username) ->
+	Reply = gen_server:call(?SERVER, {replythread, Threadid, Content, Username}),
+	{ok, Reply}.
+
 %%%====================================================================
 %%% callbacks
 %%%====================================================================
@@ -49,21 +60,41 @@ init([]) ->
 	{ok, #state{}}.
 	
 
-handle_call({readthread, Threadid}, _From, State) ->
+handle_call({readthread, Threadid, Username}, _From, State) ->
 	Result = ha_database:find(thread, ["_id"], [Threadid]),
+	UserResult = ha_database:find(user,[username], [Username]),
 	case Result of 
 		{} -> {reply, State#state{data={[{status, nothread}]}}, State};
-		{_} -> {reply, State#state{data={[{thread_info, thread_jsonify(Result)}]}}, State}
+		{_} -> 
+			{Result1, Username} = thread_jsonify(Result),
+			UserInfo = ha_database:find(user, ["username"], [Username]),
+			case Username of
+			null -> 
+				{reply, State#state{data={[{thread_info, Result1} ,{user_info, userpage_jsonify(UserInfo)}]}}, State};
+			_ ->
+				{reply, State#state{data={[{thread_info, Result1} ,{user_info, userpage_jsonify(UserInfo)}, {userinfo, login_jsonify(UserResult)}]}}, State}
+			end
+	end;
+handle_call({replythread, Threadid, Content, Username}, _From, State) ->
+	{M, S, _} = os:timestamp(),
+	Result = ha_database:insert(reply, [thread, content, username, time], [Threadid, Content, Username, 1000000*M+S]),
+	case Result of
+		{ok, Id} ->
+			ha_database:update(thread, ["_id", reply], [Threadid, Id], "$push"),
+			{reply, State#state{data=ok}, State};
+		{error, _} ->
+			{reply, State#state{data=error}, State}
 	end.
-
 
 handle_cast(stop, State) ->
 	{stop, normal, State}.
 
 handle_info(timeout, State) ->
+	ha_thread_sup:start_child(),
 	{ok, State}.
 
 terminate(_Reason, _State) ->
+	ha_thread_sup:start_child(),
 	ok.
 
 code_change(_OldVsn, State, _Extra) ->
@@ -77,7 +108,19 @@ thread_jsonify(Result) ->
 	{{'_id',Id,title,Title,content,Content,read,Read,reply,Reply,username, Username, 
 	category, Category, rtotal, Rtotal, time, Time, loves, 
 	Loves, lock, Lock, accesslevel,Accesslevel}} = Result,
-	{[{title, list_to_binary(Title)},{id, list_to_binary(Id)}, {content, list_to_binary(Content)},{read, Read}, {reply, Reply}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {rtotal, Rtotal},{time, Time}, {loves, Loves}, {lock, list_to_binary(Lock)}, {accesslevel, Accesslevel}]}.
+	{{[{title, list_to_binary(Title)},{id, list_to_binary(Id)}, {content, list_to_binary(Content)},{read, Read}, {reply, Reply}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {rtotal, Rtotal},{time, Time}, {loves, Loves}, {lock, list_to_binary(Lock)}, {accesslevel, Accesslevel}]}, Username}.
+
+userpage_jsonify(Userinfo) ->
+    {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,threads,Threads,_,_,signature,Signature,
+    email,Email,avatar,Avatar,_,_,replies,Replies,_,_,_,_,block,Block,role,Role,_,_}} = Userinfo,
+        {[{id,list_to_binary(Id)}, {username,list_to_binary(Username)},{nickname,list_to_binary(Nickname)},{registertime,Registertime},
+        {threadcount, length(Threads)},{replycount, length(Replies)},
+        {signature,list_to_binary(Signature)},{email,list_to_binary(Email)},{avatar,list_to_binary(Avatar)},
+        {block,Block},{role,list_to_binary(Role)}]}.
+
+login_jsonify(T) ->
+	{{_id,Id,username,Username,_,_,nickname,Nickname,_,_,_,_,_,_,_,_,_,_,avatar,Avatar,_,_,_,_,_,_,_,_,_,_,_,_,_,_}} = T,
+	{[{id, list_to_binary(Id)}, {username, list_to_binary(Username)},{nickname, list_to_binary(Nickname)}, {avatar, list_to_binary(Avatar)}]}.
 
 lists_to_binary([], R) ->
     R;

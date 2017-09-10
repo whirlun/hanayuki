@@ -1,7 +1,7 @@
 -module(ha_database).
 
 %%API
--export([insert/3, remove/3, find/3, update/4, latest_thread/2, prepare_cache/3, activities/2]).
+-export([insert/3, remove/3, find/3, update/4, latest_thread/2, prepare_cache/3, activities/2, expand_thread/2]).
 
 %-define(DEFAULT_NODE, lists:concat(['javaNode@', gethostname()])).
 -define(DEFAULT_NODE, 'javaNode@bbrabbitsurface').
@@ -45,6 +45,10 @@ activities(Username, Page) ->
         error -> {error, Result};
         ok -> Result
     end.
+
+expand_thread(ThreadId, Content) ->
+    Result = ha_mongo:expand_thread(?DEFAULT_NODE, thread, [], [ThreadId, Content]),
+    Result.
 
 gethostname() ->
     {ok, Hostname} = inet:gethostname(),

@@ -29,5 +29,15 @@ module.exports = local = {
 		let request = {"module": "ha_index", "function": "add_thread", "arg": [title, content, username, category, accessLevel]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
+	},
+
+	expandThread: function(id, content) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) => {
+			client.end();
+		})
+		let request = {"module": "ha_index", "function": "expand_thread", "arg": [id, content]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);
 	} 
 }
