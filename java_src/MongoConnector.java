@@ -83,6 +83,12 @@ public class MongoConnector {
 
     public void update(String setname,OtpErlangList keys,OtpErlangList values, OtpErlangString operation) throws Exception {
         MongoCollection<Document> collection = mdb.getCollection(setname);
+        String head = (String)convert2Java(keys.getHead());
+        if(head.equals("_id")) {
+            ObjectId id = new ObjectId((String)convert2Java(values.getHead()));
+            collection.updateMany(Filters.eq(head, id),
+                new Document((String)convert2Java(operation), new Document((String)convert2Java(keys.elementAt(1)), convert2Java(values.elementAt(1)))));
+        }
         collection.updateMany(Filters.eq((String)convert2Java(keys.getHead()), convert2Java(values.getHead())),
                 new Document((String)convert2Java(operation), new Document((String)convert2Java(keys.elementAt(1)), convert2Java(values.elementAt(1)))));
     }

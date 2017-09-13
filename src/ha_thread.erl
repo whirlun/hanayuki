@@ -60,15 +60,15 @@ init([]) ->
 	{ok, #state{}}.
 	
 
-handle_call({readthread, Threadid, Username}, _From, State) ->
+handle_call({readthread, Threadid, Username1}, _From, State) ->
 	Result = ha_database:find(thread, ["_id"], [Threadid]),
-	UserResult = ha_database:find(user,[username], [Username]),
+	UserResult = ha_database:find(user,[username], [Username1]),
 	case Result of 
 		{} -> {reply, State#state{data={[{status, nothread}]}}, State};
 		{_} -> 
 			{Result1, Username} = thread_jsonify(Result),
 			UserInfo = ha_database:find(user, ["username"], [Username]),
-			case Username of
+			case Username1 of
 			null -> 
 				{reply, State#state{data={[{thread_info, Result1} ,{user_info, userpage_jsonify(UserInfo)}]}}, State};
 			_ ->
@@ -81,6 +81,7 @@ handle_call({replythread, Threadid, Content, Username}, _From, State) ->
 	case Result of
 		{ok, Id} ->
 			ha_database:update(thread, ["_id", reply], [Threadid, Id], "$push"),
+			ha_database:update(thread, ["_id", rtotal], [Threadid, 1], "$inc"),
 			{reply, State#state{data=ok}, State};
 		{error, _} ->
 			{reply, State#state{data=error}, State}

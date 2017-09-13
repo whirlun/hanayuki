@@ -102,7 +102,7 @@
       <div class="modal-body" id="modalContent">
           <div style="text-align: center">
           <p>未登陆的游客没有权限开启讨论串，请登陆后再试</p>
-          <small>请点此<a data-toggle="modal" data-target="#login">登陆</a>。没有账号？<a data-toggle="modal" data-target="#register" href="javascript:void(0)" onclick="$('#addThread').modal('toggle')">注册</a></small>
+          <small>请点此<a data-toggle="modal" data-target="#login" href="javascript:void(0)" onclick="$('#addThread').modal('toggle')">登陆</a>。没有账号？<a data-toggle="modal" data-target="#register" href="javascript:void(0)" onclick="$('#addThread').modal('toggle')">注册</a></small>
           </div>
       </div>
       <div class="modal-footer" id="modalFooter">

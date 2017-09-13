@@ -296,7 +296,8 @@ margin-top:20px;
     display: block;
     border: 1px solid #ccc;
     height: 30px;
-    padding: 0px;
+    padding-top: 2px;
+    padding-right:2px; 
     overflow: hidden
 }
 

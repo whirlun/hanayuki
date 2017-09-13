@@ -20,11 +20,11 @@ exports.read = (req, res) => {
 	})
 }
 
-exports.replythread = (req, res) => {
-	let threadid = req.body.threadid;
+exports.reply = (req, res) => {
+	let threadid = req.params.threadid;
 	let content = req.body.content;
 	let username = req.session.username;
-	Thread.replythread(threadid, content, username, (model) => {
+	Thread.reply(threadid, content, username, (model) => {
 		let stringed = JSON.parse(model);
 		let viewModel = JSON.parse(stringed);
 		if (viewModel == "error") res.sendStatus(500);

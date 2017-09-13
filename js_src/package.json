@@ -12,6 +12,7 @@
     "csurf": "^1.9.0",
     "dustjs-helper-formatdate": "^1.0.0",
     "dustjs-helpers": "^1.7.3",
+    "dustjs-helpers-markdown": "0.0.5",
     "dustjs-linkedin": "^2.7.5",
     "express": "^4.15.3",
     "express-session": "^1.15.3",

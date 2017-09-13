@@ -7,7 +7,7 @@ module.exports = (app) => {
 	app.get('/thread/:threadid', thread.read);
 	app.get('/userhome/:username', user.userpage);
 	app.post('/thread/add', index.add);
-	//app.post('/thread/reply', thread.reply);
+	app.post('/thread/:threadid/reply', thread.reply);
 	app.post('/user/register', user.register);
 	app.post('/user/login', user.login)
 	app.post('/user/checkUsername', user.checkUsername);
