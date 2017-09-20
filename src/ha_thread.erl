@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, read_thread/2, reply_thread/3]).
+-export ([start_link/0, read_thread/2, reply_thread/3, get_reply/2]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -52,6 +52,15 @@ reply_thread(Threadid, Content, Username) ->
 	Reply = gen_server:call(?SERVER, {replythread, Threadid, Content, Username}),
 	{ok, Reply}.
 
+%%---------------------------------------------------------------------
+%%@doc get replies
+%%@spec get_reply(Threadid::Strings(), Replylist::List()) -> {ok, sent}
+%%@End
+%%---------------------------------------------------------------------
+
+get_reply(Threadid, Replylist) ->
+	Reply = gen_server:call(?SERVER, {getreply, Threadid, Replylist}),
+	{ok, Reply}.
 %%%====================================================================
 %%% callbacks
 %%%====================================================================
@@ -85,7 +94,11 @@ handle_call({replythread, Threadid, Content, Username}, _From, State) ->
 			{reply, State#state{data=ok}, State};
 		{error, _} ->
 			{reply, State#state{data=error}, State}
-	end.
+	end;
+handle_call({getreply, Threadid, Replylist}, _From, State) ->
+	[Re] = Replylist,
+	Reply = [reply_jsonify(ha_database:find(reply, ["_id"], [binary_to_list(R)]))||R <- string:split(Re, ",")],
+	{reply, State#state{data={[{replies,Reply}]}}, State}.
 
 handle_cast(stop, State) ->
 	{stop, normal, State}.
@@ -109,7 +122,7 @@ thread_jsonify(Result) ->
 	{{'_id',Id,title,Title,content,Content,read,Read,reply,Reply,username, Username, 
 	category, Category, rtotal, Rtotal, time, Time, loves, 
 	Loves, lock, Lock, accesslevel,Accesslevel}} = Result,
-	{{[{title, list_to_binary(Title)},{id, list_to_binary(Id)}, {content, list_to_binary(Content)},{read, Read}, {reply, Reply}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {rtotal, Rtotal},{time, Time}, {loves, Loves}, {lock, list_to_binary(Lock)}, {accesslevel, Accesslevel}]}, Username}.
+	{{[{title, list_to_binary(Title)},{id, list_to_binary(Id)}, {content, list_to_binary(Content)},{read, Read}, {reply, lists_to_binary(Reply, [])}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {rtotal, Rtotal},{time, Time}, {loves, Loves}, {lock, list_to_binary(Lock)}, {accesslevel, Accesslevel}]}, Username}.
 
 userpage_jsonify(Userinfo) ->
     {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,threads,Threads,_,_,signature,Signature,
@@ -122,6 +135,11 @@ userpage_jsonify(Userinfo) ->
 login_jsonify(T) ->
 	{{_id,Id,username,Username,_,_,nickname,Nickname,_,_,_,_,_,_,_,_,_,_,avatar,Avatar,_,_,_,_,_,_,_,_,_,_,_,_,_,_}} = T,
 	{[{id, list_to_binary(Id)}, {username, list_to_binary(Username)},{nickname, list_to_binary(Nickname)}, {avatar, list_to_binary(Avatar)}]}.
+
+reply_jsonify(R) ->
+	{{_id, Id, thread, _, content, Content,username, Username, time, Time}} = R,
+	{[{id, list_to_binary(Id)}, {username, list_to_binary(Username)}, {content, list_to_binary(Content)}, {time, Time}]}.
+
 
 lists_to_binary([], R) ->
     R;

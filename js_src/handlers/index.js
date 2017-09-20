@@ -30,17 +30,22 @@ exports.add = (req, res) => {
 	let accesslevel = req.body.accesslevel;
 	let username = req.session.username;
 	let itertime = 0;
-	if (content.length > 300) {
-		itertime += Math.ceil(content.length / 300);
-	}
-	if (itertime > 2) {
-		res.writeHead(400, {});
+	let errormsg = (httpcode, id) => {
+		res.writeHead(httpcode, {});
 		let jsonData = {
-			"errorcode": 1
+			"errorcode": id
 		};
 		res.write(JSON.stringify(jsonData));
 		res.end();
+	} 
+	if (content.length > 300) {
+		itertime += Math.ceil(content.length / 300);
 	}
+	if (itertime > 3) {
+		errormsg(400, 1);
+	}
+	else
+	{
 	if (itertime != 0) {
 		Index.addThread(title, content.substring(0, 300), username, category, accesslevel, (model) => {
 			itertime--;
@@ -48,11 +53,11 @@ exports.add = (req, res) => {
 			let viewModel = JSON.parse(stringed);
 			let id = viewModel.threadid;
 			Index.expandThread(id, content.substring(300, 600), (model) => {
-				itertime--;
+				console.log(itertime);
 				if (itertime == 0) {
 					let stringed = JSON.parse(model);
 					let viewModel = JSON.parse(stringed);
-					if (viewModel == "error") res.sendStatus(500);
+					if (viewModel == "error") errormsg(2);
 					res.sendStatus(200);
 				}
 					else {
@@ -60,7 +65,7 @@ exports.add = (req, res) => {
 							itertime--;
 							let stringed = JSON.parse(model);
 							let viewModel = JSON.parse(stringed);
-							if (viewModel == "error") res.sendStatus(500);
+							if (viewModel == "error") errormsg(2);
 							res.sendStatus(200);
 						}
 						)
@@ -68,15 +73,14 @@ exports.add = (req, res) => {
 				}
 
 			) 
-			if (viewModel == "error") res.sendStatus(500); 
-			res.sendStatus(200);
 		})
 } else {
 	Index.addThread(title, content, username, category, accesslevel, (model) => {
 		let stringed = JSON.parse(model);
 		let viewModel = JSON.parse(stringed);
-		if (viewModel == "error") res.sendStatus(500);
+		if (viewModel == "error") errormsg(500, 2);
 		res.sendStatus(200);
 	})
+}
 }
 }

@@ -31,9 +31,11 @@ module.exports = local = {
 		client.write(buf);
 	},
 
-	expandThread: function(id, content) {
+	expandThread: function(id, content, callback) {
 		let client = new net.Socket().connect(PORT, HOST);
 		client.on('data', (data) => {
+			let reply = "" + data;
+			callback(reply);
 			client.end();
 		})
 		let request = {"module": "ha_index", "function": "expand_thread", "arg": [id, content]};

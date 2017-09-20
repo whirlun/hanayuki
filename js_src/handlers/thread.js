@@ -24,10 +24,34 @@ exports.reply = (req, res) => {
 	let threadid = req.params.threadid;
 	let content = req.body.content;
 	let username = req.session.username;
+	let errormsg = (httpcode, id) => {
+		res.writeHead(httpcode, {});
+		let jsonData = {
+			"errorcode": id
+		};
+		res.write(JSON.stringify(jsonData));
+		res.end();
+	} 
+	if (content.length > 300) {
+		errormsg(400,1);
+	}
 	Thread.reply(threadid, content, username, (model) => {
 		let stringed = JSON.parse(model);
 		let viewModel = JSON.parse(stringed);
-		if (viewModel == "error") res.sendStatus(500);
+		if (viewModel == "error") errormsg(500, 2);
 		res.sendStatus(200);
+	})
+}
+
+exports.getreply = (req, res) => {
+	let threadid = req.params.threadid;
+	let replylist = req.body.reply;
+	console.log("y");
+	replylist  = JSON.parse(replylist);
+	Thread.getreply(threadid, replylist, (model) => {
+		let stringed = JSON.parse(model);
+        let viewModel = JSON.parse(stringed);
+        if(viewModel == "error") res.sendStatus(500);
+        res.send(JSON.stringify(viewModel));
 	})
 }
