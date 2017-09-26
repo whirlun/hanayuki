@@ -9,6 +9,7 @@ module.exports = (app) => {
 	app.post('/thread/add', index.add);
 	app.post('/thread/:threadid/reply', thread.reply);
 	app.post('/thread/:threadid/getreply', thread.getreply);
+	app.post('/thread/:threadid/like', thread.like);
 	app.post('/user/register', user.register);
 	app.post('/user/login', user.login)
 	app.post('/user/checkUsername', user.checkUsername);

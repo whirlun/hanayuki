@@ -41,5 +41,17 @@ module.exports = local = {
 		let request = {"module": "ha_thread", "function": "get_reply", "arg":[threadid, replylist]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
+	},
+
+	like: function(threadid, username, callback) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) => {
+			let reply = "" + data;
+			callback(reply);
+			client.end();
+	})
+		let request = {"module": "ha_thread", "function": "like", "arg":[threadid, username]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);		
 	}
 }

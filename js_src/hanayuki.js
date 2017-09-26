@@ -16,12 +16,11 @@ if(cluster.isMaster) {
 var express = require('express');
 var http = require('http');
 var app = express();
-var dust = require('dustjs-linkedin');
+var dust = require('dustjs-helpers');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var csrf = require('csurf');
 var bodyParser = require('body-parser');
-require('dustjs-helpers');
 require('moment');
 require('dustjs-helper-formatdate');
 var redisStore = require('connect-redis')(session);

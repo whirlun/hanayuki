@@ -10,6 +10,16 @@ exports.read = (req, res) => {
         	res.sendStatus(404);
         }
         viewModel.csrf = req.csrfToken();
+        let lovelist = viewModel.user_info.loves;
+        let isloved = lovelist.find((value) => {
+        	if(value == threadid) return true;
+        })
+        if(isloved == undefined) {
+        	viewModel.love = "false";
+        }
+        else {
+        	viewModel.love = "true";
+        }
         viewModel.loginStatus = (chunk, context, bodies, params) => {
 		if(req.session.username == null) {
 				return chunk.render(bodies.notLogin, context);
@@ -53,5 +63,16 @@ exports.getreply = (req, res) => {
         let viewModel = JSON.parse(stringed);
         if(viewModel == "error") res.sendStatus(500);
         res.send(JSON.stringify(viewModel));
+	})
+}
+
+exports.like = (req, res) => {
+	let threadid = req.params.threadid;
+	let username = req.session.username;
+	Thread.like(threadid, username, (model) => {
+		let stringed = JSON.parse(model);
+        let viewModel = JSON.parse(stringed);
+        if(viewModel == "error") res.sendStatus(500);
+        res.send(JSON.stringify(viewModel));				
 	})
 }

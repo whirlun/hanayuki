@@ -22,6 +22,8 @@
 <div class="col-md-offset-11 col-md-1">
 <ul class="thread-slidebar">
 <li><a data-toggle="modal" data-target="#replythread"><span class="glyphicons glyphicons-comments"></span></li>
+<li><a href="javascript:void(0)" onclick="like()"><span id="like" class="glyphicons {@eq key=love value="false"} glyphicons-heart-empty
+                                                                                          {:else} glyphicons-heart {/eq}"></span></a></li>
 </ul>
 </div>
 <div id="thread-reply">
@@ -48,11 +50,31 @@
 	})
 	.fail(function(msg) {
     console.log("failed");
-	
 	}
 )}};
 
-
+var like = function() {
+  var jsonData = {"_csrf": "{csrf}"};
+  var url = window.location.href.split("/")[4];
+  $.ajax({
+    url: '/thread/'+url+'/like',
+    type: 'POST',
+    data: jsonData
+  })
+  .done(function() {
+    if($("#like").hasClass("glyphicons-heart-empty")) {
+    $("#like").removeClass("glyphicons-heart-empty");
+    $("#like").addClass("glyphicons-heart");
+  }
+  else {
+        $("#like").removeClass("glyphicons-heart");
+        $("#like").addClass("glyphicons-heart-empty");
+  }
+  })
+  .fail(function() {
+    console.log("error");
+  });
+};
 
 var converter = new showdown.Converter();
 Function.prototype.getMultilines = function () {  
