@@ -12,6 +12,11 @@
 
 start(_StartType, _StartArgs) ->
 	%mnesia:init(),
+	application:start(xmerl),
+	application:start(compiler),
+	application:start(syntax_tools),
+	application:start(rabbit_common),
+	application:ensure_started(amqp_client),
 	case ha_sup:start_link() of
 		{ok, Pid} -> 
 			{ok, Pid};

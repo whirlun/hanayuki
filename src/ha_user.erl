@@ -200,11 +200,9 @@ replies_jsonify([], Result) ->
     Result1 = lists:reverse(Result),
     Result1;
 replies_jsonify([H|T], Result) ->
-    {'_id',Id,title,Title,content,Content,read,Read,reply,_,username, Username, 
-    category, Category, rtotal, Rtotal, time, Time, loves, 
-    Loves, lock, Lock, accesslevel,Accesslevel} = H,
-    H1 = {[{title, list_to_binary(Title)},{id, list_to_binary(Id)}, {content, list_to_binary(Content)}, {read, Read}, {reply, Rtotal}, {username, list_to_binary(Username)}, {category,list_to_binary(Category)}, {time, Time}, {loves, Loves}, {lock, list_to_binary(Lock)}, {accesslevel, Accesslevel}]},
-    activities_jsonify(T, [H1| Result]).
+    {'_id', Id, thread, _, content, Content, username, Username, time, Time, threadname, Threadname} = H,
+    H1 = {[{id, list_to_binary(Id)}, {content, list_to_binary(Content)}, {username, list_to_binary(Username)},  {time, Time}, {threadname, list_to_binary(Threadname)}]},
+    replies_jsonify(T, [H1| Result]).
 
 lists_to_binary([], R) ->
     R;

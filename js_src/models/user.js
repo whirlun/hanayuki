@@ -52,5 +52,18 @@ module.exports = local = {
 		let request = {"module": "ha_user", "function": "activities", "arg": [username, page]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
+	},
+
+	replies: function(username, page, callback) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) =>
+		{
+			let reply = "" + data;
+			callback(reply);
+			client.end();
+		})
+		let request = {"module": "ha_user", "function": "replies", "arg": [username, page]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);
 	}
 }

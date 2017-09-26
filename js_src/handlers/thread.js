@@ -24,6 +24,7 @@ exports.reply = (req, res) => {
 	let threadid = req.params.threadid;
 	let content = req.body.content;
 	let username = req.session.username;
+	let threadtitle = req.body.threadname;
 	let errormsg = (httpcode, id) => {
 		res.writeHead(httpcode, {});
 		let jsonData = {
@@ -35,7 +36,7 @@ exports.reply = (req, res) => {
 	if (content.length > 300) {
 		errormsg(400,1);
 	}
-	Thread.reply(threadid, content, username, (model) => {
+	Thread.reply(threadid, content, username, threadtitle, (model) => {
 		let stringed = JSON.parse(model);
 		let viewModel = JSON.parse(stringed);
 		if (viewModel == "error") errormsg(500, 2);
@@ -46,7 +47,6 @@ exports.reply = (req, res) => {
 exports.getreply = (req, res) => {
 	let threadid = req.params.threadid;
 	let replylist = req.body.reply;
-	console.log("y");
 	replylist  = JSON.parse(replylist);
 	Thread.getreply(threadid, replylist, (model) => {
 		let stringed = JSON.parse(model);

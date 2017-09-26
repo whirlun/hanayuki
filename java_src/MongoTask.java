@@ -34,7 +34,7 @@ public class MongoTask implements Runnable {
     }
 
     private enum actions {
-        INSERT, REMOVE, FIND, UPDATE, LATESTTHREAD, PREPARECACHE,ACTIVITIES, EXPANDTHREAD;
+        INSERT, REMOVE, FIND, UPDATE, LATESTTHREAD, PREPARECACHE,ACTIVITIES, EXPANDTHREAD,REPLIES;
     }
 
     public void run() {
@@ -64,6 +64,9 @@ public class MongoTask implements Runnable {
                     break;
                 case EXPANDTHREAD:
                     doExpandThread();
+                    break;
+                case REPLIES:
+                    doReplies();
                     break;
             }}catch (Exception e){
             OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
@@ -171,6 +174,21 @@ public class MongoTask implements Runnable {
         ArrayList<OtpErlangObject> arrayList = new ArrayList<>();
         List<Document> result;
         result = conn.activities(setname, keys, values);
+        for (Document doc : result) {
+            arrayList.add(java2Erlang(doc));
+        }
+        OtpErlangObject[] erlangArray = new OtpErlangObject[arrayList.size()];
+        arrayList.toArray(erlangArray);
+        OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[]{
+                new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), new OtpErlangList(erlangArray), ref
+        });
+        mbox.send(from, reply);
+    }
+
+    private void doReplies() throws Exception {
+        ArrayList<OtpErlangObject> arrayList = new ArrayList<>();
+        List<Document> result;
+        result = conn.replies(setname, keys, values);
         for (Document doc : result) {
             arrayList.add(java2Erlang(doc));
         }

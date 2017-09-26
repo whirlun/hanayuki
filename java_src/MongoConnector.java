@@ -159,6 +159,41 @@ public class MongoConnector {
         return results;
     }
 
+public List<Document> replies(String setname, OtpErlangList keys, OtpErlangList values) throws Exception {
+        List<Document> results = new ArrayList<>();
+        MongoCollection<Document> collection = mdb.getCollection(setname);
+        String username = ((String) convert2Java(values.elementAt(0)));
+        int page = ((Long) convert2Java(values.elementAt(1))).intValue();
+        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(match(Filters.eq("username", username)), project(fields(include("replies"), excludeId()))));
+        for (Document doc : result) {
+            results.add(doc);
+        }
+        int startIndex, endIndex;
+        List<String> resultList = ((List<String>)(results.get(0)).get("replies"));
+        if (page < 1) page = 1;
+        startIndex = ((page - 1) * 9) < resultList.size() ? ((page - 1) * 9) : 0;
+        if (page > 1) {
+        if (page * 9 > resultList.size()) {
+            endIndex = resultList.size();
+        }
+        else {
+            endIndex = page*9;
+        }
+    }
+    else {
+        if(resultList.size() > 9) {
+            endIndex = 9;
+        }
+        else {
+            endIndex = resultList.size();
+        }
+    }
+
+        List<String> sublist = resultList.subList(startIndex, endIndex);
+        results = repliesHelper(sublist);
+        return results;
+    }    
+
 public ObjectId expandThread(String setname, OtpErlangList keys, OtpErlangList values) throws Exception{
     MongoCollection collection = mdb.getCollection(setname);
     ObjectId id = new ObjectId((String)convert2Java(values.elementAt(0)));
@@ -185,6 +220,17 @@ public ObjectId expandThread(String setname, OtpErlangList keys, OtpErlangList v
         return results;
     }
 
+    private List<Document> repliesHelper(List<String> aList) {
+        MongoCollection<Document> collection = mdb.getCollection("reply");
+        ArrayList<Document> results = new ArrayList<>();
+        for(String id:aList) {
+            FindIterable<Document> findIterable = collection.find(Filters.eq("_id", new ObjectId(id)));
+            for(Document doc:findIterable) {
+                results.add(doc);
+            }
+        }
+        return results;
+    }
 
 
     private enum OtpTypes {

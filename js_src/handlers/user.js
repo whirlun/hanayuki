@@ -125,6 +125,20 @@ exports.activities = (req, res) => {
     })
 }
 
+
+exports.replies = (req, res) => {
+    let username = req.params.username;
+    let page = req.body.page;
+    User.replies(username, page, (model) =>
+    {
+        let stringed = JSON.parse(model);
+        let viewModel = JSON.parse(stringed);
+        if(viewModel == "error") res.sendStatus(500);
+        viewModel.page = page;
+        res.send(JSON.stringify(viewModel));
+    })
+}
+
 exports.logout = (req, res) => {
     let logout = req.body.logout;
     if(logout) {

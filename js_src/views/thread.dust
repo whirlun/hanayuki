@@ -107,6 +107,7 @@ var push = function()  {
                     <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-console" aria-label="code"></span>
                 </div>
                 <textarea name="content" class="form-control" rows="10"></textarea>
+                <input type="hidden" name="threadname" value="{thread_info.title}" />
                 <input type="hidden" name="_csrf" value="{csrf}">
         </form>
       </div>

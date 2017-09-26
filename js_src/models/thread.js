@@ -19,14 +19,14 @@ module.exports = local = {
 	client.write(buf);
 	},
 
-	reply: function(threadid, content, username, callback) {
+	reply: function(threadid, content, username, threadname, callback) {
 		let client = new net.Socket().connect(PORT, HOST);
 		client.on('data', (data) => {
 			let reply = "" + data;
 			callback(reply);
 			client.end()
 		})
-		let request = {"module": "ha_thread", "function": "reply_thread", "arg":[threadid, content, username]};
+		let request = {"module": "ha_thread", "function": "reply_thread", "arg":[threadid, content, username, threadname]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);
 	},
@@ -38,7 +38,6 @@ module.exports = local = {
 			callback(reply);
 			client.end();
 	})
-		console.log(replylist);
 		let request = {"module": "ha_thread", "function": "get_reply", "arg":[threadid, replylist]};
 		let buf = new Buffer(JSON.stringify(request));
 		client.write(buf);

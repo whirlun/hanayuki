@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, read_thread/2, reply_thread/3, get_reply/2]).
+-export ([start_link/0, read_thread/2, reply_thread/4, get_reply/2]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -48,8 +48,8 @@ read_thread(Threadid, Username) ->
 %%@End
 %%---------------------------------------------------------------------
 
-reply_thread(Threadid, Content, Username) ->
-	Reply = gen_server:call(?SERVER, {replythread, Threadid, Content, Username}),
+reply_thread(Threadid, Content, Username, Threadname) ->
+	Reply = gen_server:call(?SERVER, {replythread, Threadid, Content, Username, Threadname}),
 	{ok, Reply}.
 
 %%---------------------------------------------------------------------
@@ -84,20 +84,21 @@ handle_call({readthread, Threadid, Username1}, _From, State) ->
 				{reply, State#state{data={[{thread_info, Result1} ,{user_info, userpage_jsonify(UserInfo)}, {userinfo, login_jsonify(UserResult)}]}}, State}
 			end
 	end;
-handle_call({replythread, Threadid, Content, Username}, _From, State) ->
+handle_call({replythread, Threadid, Content, Username, Threadname}, _From, State) ->
 	{M, S, _} = os:timestamp(),
-	Result = ha_database:insert(reply, [thread, content, username, time], [Threadid, Content, Username, 1000000*M+S]),
+	Result = ha_database:insert(reply, [thread, content, username, time, threadname], [Threadid, Content, Username, 1000000*M+S, Threadname]),
 	case Result of
 		{ok, Id} ->
 			ha_database:update(thread, ["_id", reply], [Threadid, Id], "$push"),
 			ha_database:update(thread, ["_id", rtotal], [Threadid, 1], "$inc"),
+			ha_database:update(user, [username, replies], [Username, Id], "$push"),
 			{reply, State#state{data=ok}, State};
 		{error, _} ->
 			{reply, State#state{data=error}, State}
 	end;
 handle_call({getreply, Threadid, Replylist}, _From, State) ->
 	[Re] = Replylist,
-	Reply = [reply_jsonify(ha_database:find(reply, ["_id"], [binary_to_list(R)]))||R <- string:split(Re, ",")],
+	Reply = [reply_jsonify(ha_database:find(reply, ["_id"], [R]))||R <- string:tokens(binary_to_list(Re), ",")],
 	{reply, State#state{data={[{replies,Reply}]}}, State}.
 
 handle_cast(stop, State) ->
@@ -137,7 +138,7 @@ login_jsonify(T) ->
 	{[{id, list_to_binary(Id)}, {username, list_to_binary(Username)},{nickname, list_to_binary(Nickname)}, {avatar, list_to_binary(Avatar)}]}.
 
 reply_jsonify(R) ->
-	{{_id, Id, thread, _, content, Content,username, Username, time, Time}} = R,
+	{{_id, Id, thread, _, content, Content,username, Username, time, Time, _, _}} = R,
 	{[{id, list_to_binary(Id)}, {username, list_to_binary(Username)}, {content, list_to_binary(Content)}, {time, Time}]}.
 
 

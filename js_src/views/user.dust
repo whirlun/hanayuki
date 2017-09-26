@@ -141,7 +141,7 @@
         if(window.replynowpage == undefined) {
             window.replynowpage = 1;
         }
-        var jsonData = {"page": window.threadnowpage,
+        var jsonData = {"page": window.replynowpage,
         "_csrf": "{csrf}"};  
         $.ajax({
             type: 'POST',
@@ -153,11 +153,11 @@
                     $('#user-detail-data').html(null);
                 }
                 var jsondata = JSON.parse(data);
-                $("#user-detail-data").append("<ul id='thread-data'></ul>");
-                for(var i = 0; i < jsondata['threads'].length; i++) {
-                    $("#thread-data").append("<li id='thread' + i + '></li>");
-                    $("#thread" + i).append("<p class='user-thread-title'>" + jsondata['replies'][i]['title'] + "</p>");
-                    $("#thread"+i).append("<p class='thread-content'>"+jsondata['replies'][i]['content'].substr(0,100)+"</p>");
+                $("#user-detail-data").append("<ul id='reply-data'></ul>");
+                for(var i = 0; i < jsondata['replies'].length; i++) {
+                    $("#reply-data").append("<li id='reply" + i + "'></li>");
+                    
+                    $("#reply"+i).append("<p class='reply-title'>"+jsondata['replies'][i]['threadname']+"</p><p class='reply-content'>"+jsondata['replies'][i]['content'].substr(0,100)+"</p>");
                 }
                 $("#user-detail-data").append("<div class='user-pagination'></div>");
                 var totalpage = Math.ceil(replycount/9);

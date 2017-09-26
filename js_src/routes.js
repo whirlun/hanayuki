@@ -14,4 +14,5 @@ module.exports = (app) => {
 	app.post('/user/checkUsername', user.checkUsername);
 	app.post('/user/logout', user.logout);
 	app.post('/userhome/:username/activities', user.activities);
+	app.post('/userhome/:username/replies', user.replies);
 }
