@@ -1,7 +1,9 @@
 'use strict'
 let User = require('../models/user.js');
 let crypto = require('crypto');
-let redis = require('../models/redis')
+let redis = require('../models/redis');
+let prefix = "ha_";
+
 
 exports.register = (req, res) => {
     let username = req.body.username;
@@ -17,7 +19,7 @@ exports.register = (req, res) => {
         if(username.length < 40 && username.length >3 && nickname.length < 40 && nickname.length > 3) {
             if(isNaN(username)) {
                 if(password.length >= 8 && password.length <= 20) {
-                    let reg = /^(\w)+(\.\w+)*@(\w)+((\.\w{2,3}){1,3})$/;
+                    let reg = /^(\w)+(\.\w+)*@([\w-])+((\.\w{2,3}){1,3})$/;
                     if (reg.test(email)) {
                         User.register(username, password, nickname, email, (model) => {
                         let stringed = JSON.parse(model);
@@ -150,13 +152,17 @@ exports.logout = (req, res) => {
 
 exports.checkUsername = (req, res) => {
     let username = req.body.username;
-    let used = redis.checkUsername(username);
-    if(used) {
+    let client = redis.getClient();
+    client.sismember(prefix + "usernames", username, (err, reply) =>{
+        if(reply == 1){
+            client.quit();
         let jsonData = {"repeat": true};
         res.send(JSON.stringify(jsonData));
     }
-else {
-    let jsonData = {"repeat": false};
+    else {
+        client.quit();
+     let jsonData = {"repeat": false};
     res.send(JSON.stringify(jsonData));
-};
     }
+});
+}

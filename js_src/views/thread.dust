@@ -24,6 +24,8 @@
 <li><a data-toggle="modal" data-target="#replythread"><span class="glyphicons glyphicons-comments"></span></li>
 <li><a href="javascript:void(0)" onclick="like()"><span id="like" class="glyphicons {@eq key=love value="false"} glyphicons-heart-empty
                                                                                           {:else} glyphicons-heart {/eq}"></span></a></li>
+<li><a href="javascript:void(0)" onclick="star()"><span id="star" class="glyphicons {@eq key=star value="false"} glyphicons-star-empty
+                                                                                          {:else} glyphicons-star {/eq}"></span></a></li>                                                                                          
 </ul>
 </div>
 <div id="thread-reply">
@@ -72,7 +74,30 @@ var like = function() {
   }
   })
   .fail(function() {
-    console.log("error");
+    console.log("likeerror");
+  });
+};
+
+var star = function() {
+  var jsonData = {"_csrf": "{csrf}"};
+  var url = window.location.href.split("/")[4];
+  $.ajax({
+    url: '/thread/'+url+'/star',
+    type: 'POST',
+    data: jsonData
+  })
+  .done(function() {
+    if($("#star").hasClass("glyphicons-star-empty")) {
+    $("#star").removeClass("glyphicons-star-empty");
+    $("#star").addClass("glyphicons-star");
+  }
+  else {
+        $("#star").removeClass("glyphicons-star");
+        $("#star").addClass("glyphicons-star-empty");
+  }
+  })
+  .fail(function() {
+    console.log("starerror");
   });
 };
 

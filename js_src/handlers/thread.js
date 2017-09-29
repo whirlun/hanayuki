@@ -11,7 +11,11 @@ exports.read = (req, res) => {
         }
         viewModel.csrf = req.csrfToken();
         let lovelist = viewModel.user_info.loves;
+        let starlist = viewModel.user_info.stars;
         let isloved = lovelist.find((value) => {
+        	if(value == threadid) return true;
+        })
+        let isStared = starlist.find((value) => {
         	if(value == threadid) return true;
         })
         if(isloved == undefined) {
@@ -19,6 +23,12 @@ exports.read = (req, res) => {
         }
         else {
         	viewModel.love = "true";
+        }
+        if(isStared == undefined) {
+        	viewModel.star = "false";
+        }
+        else {
+        	viewModel.star = "true";
         }
         viewModel.loginStatus = (chunk, context, bodies, params) => {
 		if(req.session.username == null) {
@@ -70,6 +80,17 @@ exports.like = (req, res) => {
 	let threadid = req.params.threadid;
 	let username = req.session.username;
 	Thread.like(threadid, username, (model) => {
+		let stringed = JSON.parse(model);
+        let viewModel = JSON.parse(stringed);
+        if(viewModel == "error") res.sendStatus(500);
+        res.send(JSON.stringify(viewModel));				
+	})
+}
+
+exports.star = (req, res) => {
+	let threadid = req.params.threadid;
+	let username = req.session.username;
+	Thread.star(threadid, username, (model) => {
 		let stringed = JSON.parse(model);
         let viewModel = JSON.parse(stringed);
         if(viewModel == "error") res.sendStatus(500);

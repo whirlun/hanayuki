@@ -104,7 +104,7 @@ handle_call({login, Username, Password}, _From, State) ->
     Result = ha_database:find(user, [username], [Username]),
     case Result of
         {} -> {reply, State#state{data={[{status, nouser}]}}, State};
-        {_} -> {{_id,Id,_,_,password,Pass,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}} = Result,
+        {_} -> {{_id,Id,_,_,password,Pass,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}} = Result,
                 Pass1 = crypto:hash(sha256, Password),
                 case Pass == Pass1 of
                 true -> {reply, State#state{data={[{status, verified}, {id, list_to_binary(Id)}]}}, State};
@@ -158,9 +158,9 @@ check_register(Username, Email) ->
 register_helper(Username, Password, Nickname, Email) ->
     Pass = crypto:hash(sha256, Password),
     {M, S, _} = os:timestamp(),
-	Result = ha_database:insert('user', [username, password, nickname, registertime, threads, loves, signature
+	Result = ha_database:insert('user', [username, password, nickname, registertime, threads, loves, stars, signature
     , email, avatar, friends, replies, messages, settings, block, role, badge], 
-    [Username, Pass, Nickname, 1000000*M+S,[], [], "", Email, "default.jpg", [], [], [], {needreply, true, neednotice, true, needat, true, 
+    [Username, Pass, Nickname, 1000000*M+S,[], [], [], "", Email, "default.jpg", [], [], [], {needreply, true, neednotice, true, needat, true, 
     blacklist, [], replythreadmode, trace, lovenotice, true, watchlist, [], tracelist,[], watchcat, [], watchtag, [],
     tracetag, [], newpage, true, background, "", cardbackground, ""}, flase, newbee, []]),
 	case Result of 
@@ -171,7 +171,7 @@ register_helper(Username, Password, Nickname, Email) ->
     end.
     
 userpage_jsonify(Userinfo) ->
-    {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,threads,Threads,_,_,signature,Signature,
+    {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,threads,Threads,_,_,_,_,signature,Signature,
     email,Email,avatar,Avatar,_,_,replies,Replies,_,_,_,_,block,Block,role,Role,_,_}} = Userinfo,
         {[{id,list_to_binary(Id)}, {username,list_to_binary(Username)},{nickname,list_to_binary(Nickname)},{registertime,Registertime},
         {threadcount, length(Threads)},{replycount, length(Replies)},

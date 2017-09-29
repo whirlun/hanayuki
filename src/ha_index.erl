@@ -150,5 +150,5 @@ user_jsonify([H|T], Result) ->
 	user_jsonify(T, [H1| Result]).
 
 login_jsonify(T) ->
-	{{_id,Id,username,Username,_,_,nickname,Nickname,_,_,_,_,_,_,_,_,_,_,avatar,Avatar,_,_,_,_,_,_,_,_,_,_,_,_,_,_}} = T,
+	{{_id,Id,username,Username,_,_,nickname,Nickname,registertime,_,threads,_,loves,_,stars,_,signature,_,email,_,avatar,Avatar,friends,_,replies,_,messages,_,settings,_,block,_,role,_,_,_}} = T,
 	{[{id, list_to_binary(Id)}, {username, list_to_binary(Username)},{nickname, list_to_binary(Nickname)}, {avatar, list_to_binary(Avatar)}]}.

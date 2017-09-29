@@ -7,6 +7,15 @@ let PORT = 2333;
 let prefix = "ha_"
 let local;
 
+exports.getClient = () => {
+  let client = redis.createClient(6379, '127.0.0.1', {"password":"1zHyBRMvAVA@s@%bu3Z"});
+  global.redisInUse = true;
+  client.on("error", (err) =>{
+    console.log("Error" + err);
+    global.redisInUse = false;});
+    return client;
+}
+
 let getClient = () => {
   let client = redis.createClient(6379, '127.0.0.1', {"password":"1zHyBRMvAVA@s@%bu3Z"});
   global.redisInUse = true;
@@ -16,7 +25,6 @@ let getClient = () => {
     return client;
 }
 
-let client = getClient();
 let redisPassword = "1zHyBRMvAVA@s@%bu3Z"
 exports.init = () => {
     global.redisInUse = false;
@@ -54,14 +62,17 @@ exports.init = () => {
 }
 
 
-exports.checkUsername = (username) => {client.sismember(prefix + "usernames", username, (err, reply) =>{
+exports.checkUsername = (username) => {
+  let client = getClient();
+  client.sismember(prefix + "usernames", username, (err, reply) =>{
         if(reply) {
-        return true;
+          debugger;
+    return true;
     }
     else {
-      return false;
+    return false;
     }
 })
 }
 
-exports.register = (username) => {client.sadd(prefix + "usernames", username);}
+exports.register = (username) => {let client = getClient();client.sadd(prefix + "usernames", username);}
