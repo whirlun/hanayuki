@@ -8,7 +8,7 @@
 -behaviour(gen_server).
 
 %%API
--export ([start_link/0, register/4, login/2, userpage/1, activities/2, replies/2]).
+-export ([start_link/0, register/4, login/2, userpage/1, activities/2, replies/2, loves/2, stars/2]).
 
 %%gen_server callbacks
 -export([init/1, handle_call/3,  handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -81,6 +81,26 @@ activities(Username, Page) ->
 replies(Username, Page) ->
     Reply = gen_server:call(?SERVER, {replies, Username, Page}),
     {ok, Reply}.
+
+%%---------------------------------------------------------------------
+%%@doc get user lovelist
+%%@spec loves(Username::String() || Atom(), Page::Integer()) -> {ok, Reply}
+%%@End
+%%---------------------------------------------------------------------
+
+loves(Username, Page) ->
+    Reply = gen_server:call(?SERVER, {loves, Username, Page}),
+    {ok, Reply}.
+
+%%---------------------------------------------------------------------
+%%@doc get user starlist
+%%@spec stars(Username::String() || Atom(), Page::Integer()) -> {ok, Reply}
+%%@End
+%%---------------------------------------------------------------------
+
+stars(Username, Page) ->
+    Reply = gen_server:call(?SERVER, {stars, Username, Page}),
+    {ok, Reply}.
 %%%====================================================================
 %%% callbacks
 %%%====================================================================
@@ -121,6 +141,14 @@ handle_call({activities, Username, Page}, _From, State) ->
     Thread_list = ha_database:activities(Username, Page),
     Result = activities_jsonify(Thread_list, []),
     {reply, State#state{data={[{threads, Result}]}}, State};
+handle_call({loves, Username, Page}, _From, State) ->
+    Thread_list = ha_database:loves(Username, Page),
+    Result = activities_jsonify(Thread_list, []),
+    {reply, State#state{data={[{loves, Result}]}}, State};
+handle_call({stars, Username, Page}, _From, State) ->
+    Thread_list = ha_database:stars(Username, Page),
+    Result = activities_jsonify(Thread_list, []),
+    {reply, State#state{data={[{stars, Result}]}}, State};
 handle_call({replies, Username, Page}, _From, State) ->
     Reply_list = ha_database:replies(Username, Page),
     Result = replies_jsonify(Reply_list, []),
@@ -171,10 +199,10 @@ register_helper(Username, Password, Nickname, Email) ->
     end.
     
 userpage_jsonify(Userinfo) ->
-    {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,threads,Threads,_,_,_,_,signature,Signature,
+    {{_id,Id,username,Username,_,_,nickname,Nickname,registertime,Registertime,threads,Threads,loves,Loves,stars,Stars,signature,Signature,
     email,Email,avatar,Avatar,_,_,replies,Replies,_,_,_,_,block,Block,role,Role,_,_}} = Userinfo,
         {[{id,list_to_binary(Id)}, {username,list_to_binary(Username)},{nickname,list_to_binary(Nickname)},{registertime,Registertime},
-        {threadcount, length(Threads)},{replycount, length(Replies)},
+        {threadcount, length(Threads)},{replycount, length(Replies)},{lovecount, length(Loves)},{starcount, length(Stars)},
         {signature,list_to_binary(Signature)},{email,list_to_binary(Email)},{avatar,list_to_binary(Avatar)},
         {block,Block},{role,list_to_binary(Role)}]}.
 

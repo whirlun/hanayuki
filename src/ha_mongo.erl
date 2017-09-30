@@ -6,7 +6,8 @@
 
 -module(ha_mongo).
 
--export([insert/4, remove/4, update/5, find/4, latest_thread/4, prepare_cache/4, activities/4, expand_thread/4, replies/4]).
+-export([insert/4, remove/4, update/5, find/4, latest_thread/4, prepare_cache/4, activities/4, 
+    expand_thread/4, replies/4, loves/4, stars/4]).
 
 insert(Node, Setname, Keys, Values) ->
     Ref = make_ref(),  
@@ -83,6 +84,30 @@ prepare_cache(Node, Setname, Keys, Values) ->
 activities(Node, Setname, Keys, Values) ->
     Ref = make_ref(),
     {mongo_server, Node} ! {activities, self(), Ref, Setname, Keys, Values},
+    receive
+        {reply, ok, Result, Ref} ->
+            {ok, Result};
+        {reply, error, Ref} ->
+            {error, internalerror}
+    after 3000 ->
+        {error, timeout}
+    end. 
+
+loves(Node, Setname, Keys, Values) ->
+    Ref = make_ref(),
+    {mongo_server, Node} ! {loves, self(), Ref, Setname, Keys, Values},
+    receive
+        {reply, ok, Result, Ref} ->
+            {ok, Result};
+        {reply, error, Ref} ->
+            {error, internalerror}
+    after 3000 ->
+        {error, timeout}
+    end. 
+
+stars(Node, Setname, Keys, Values) ->
+    Ref = make_ref(),
+    {mongo_server, Node} ! {stars, self(), Ref, Setname, Keys, Values},
     receive
         {reply, ok, Result, Ref} ->
             {ok, Result};

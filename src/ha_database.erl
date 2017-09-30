@@ -1,7 +1,8 @@
 -module(ha_database).
 
 %%API
--export([insert/3, remove/3, find/3, update/4, latest_thread/2, prepare_cache/3, activities/2, expand_thread/2, replies/2]).
+-export([insert/3, remove/3, find/3, update/4, latest_thread/2, prepare_cache/3, 
+    activities/2, expand_thread/2, replies/2,loves/2, stars/2]).
 
 %-define(DEFAULT_NODE, lists:concat(['javaNode@', gethostname()])).
 -define(DEFAULT_NODE, 'javaNode@bbrabbitsurface').
@@ -41,6 +42,20 @@ end.
 
 activities(Username, Page) ->
     {Status, Result} = ha_mongo:activities(?DEFAULT_NODE, user, [], [Username, Page]),
+    case Status of
+        error -> {error, Result};
+        ok -> Result
+    end.
+
+loves(Username, Page) ->
+    {Status, Result} = ha_mongo:loves(?DEFAULT_NODE, user, [], [Username, Page]),
+    case Status of
+        error -> {error, Result};
+        ok -> Result
+    end.
+
+stars(Username, Page) ->
+    {Status, Result} = ha_mongo:stars(?DEFAULT_NODE, user, [], [Username, Page]),
     case Status of
         error -> {error, Result};
         ok -> Result

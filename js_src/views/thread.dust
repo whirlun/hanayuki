@@ -123,7 +123,7 @@ var push = function()  {
         url: '/thread/'+url+'/reply',
         data: JSON.stringify($("#pushForm").serializeJSON()),
         success: function()  {var success = "<div class='text-center'><span class='glyphicon glyphicon-ok' aria-hidden='true' font-size='50px'></span></div><p class='lead text-center'>成功发送讨论串</p><br /><div class='text-center'><small>点击任意处以关闭此窗口</small>";
-        $("#modalContent").html(success); $("#modalFooter").html("");$("#addThread").on("hidden.bs.modal", function() {  location.reload() });},
+        $("#modalContent").html(success); $("#modalFooter").html("");$("#replythread").on("hidden.bs.modal", function() {  location.reload() });},
         error: function(msg)  {
         var error = {"1":"单条回复长度不能超过300个字符，删掉一点再发吧~", "2":"错误-发生内部错误，请刷新后再试哟"};
           var jsonData = JSON.parse(msg['responseText']);

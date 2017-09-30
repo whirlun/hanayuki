@@ -54,6 +54,31 @@ module.exports = local = {
 		client.write(buf);
 	},
 
+	loves: function(username, page, callback) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) =>
+		{
+			let reply = "" + data;
+			callback(reply);
+			client.end();
+		})
+		let request = {"module": "ha_user", "function": "loves", "arg": [username, page]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);
+	},
+
+	stars: function(username, page, callback) {
+		let client = new net.Socket().connect(PORT, HOST);
+		client.on('data', (data) =>
+		{
+			let reply = "" + data;
+			callback(reply);
+			client.end();
+		})
+		let request = {"module": "ha_user", "function": "stars", "arg": [username, page]};
+		let buf = new Buffer(JSON.stringify(request));
+		client.write(buf);
+	},
 	replies: function(username, page, callback) {
 		let client = new net.Socket().connect(PORT, HOST);
 		client.on('data', (data) =>

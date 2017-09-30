@@ -159,6 +159,76 @@ public class MongoConnector {
         return results;
     }
 
+    public List<Document> loves(String setname, OtpErlangList keys, OtpErlangList values) throws Exception {
+        List<Document> results = new ArrayList<>();
+        MongoCollection<Document> collection = mdb.getCollection(setname);
+        String username = ((String) convert2Java(values.elementAt(0)));
+        int page = ((Long) convert2Java(values.elementAt(1))).intValue();
+        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(match(Filters.eq("username", username)), project(fields(include("loves"), excludeId()))));
+        for (Document doc : result) {
+            results.add(doc);
+        }
+        int startIndex, endIndex;
+        List<String> resultList = ((List<String>)(results.get(0)).get("loves"));
+        if (page < 1) page = 1;
+        startIndex = ((page - 1) * 9) < resultList.size() ? ((page - 1) * 9) : 0;
+        if (page > 1) {
+        if (page * 9 > resultList.size()) {
+            endIndex = resultList.size();
+        }
+        else {
+            endIndex = page*9;
+        }
+    }
+    else {
+        if(resultList.size() > 9) {
+            endIndex = 9;
+        }
+        else {
+            endIndex = resultList.size();
+        }
+    }
+
+        List<String> sublist = resultList.subList(startIndex, endIndex);
+        results = activitiesHelper(sublist);
+        return results;
+    }
+
+    public List<Document> stars(String setname, OtpErlangList keys, OtpErlangList values) throws Exception {
+        List<Document> results = new ArrayList<>();
+        MongoCollection<Document> collection = mdb.getCollection(setname);
+        String username = ((String) convert2Java(values.elementAt(0)));
+        int page = ((Long) convert2Java(values.elementAt(1))).intValue();
+        AggregateIterable<Document> result = collection.aggregate(Arrays.asList(match(Filters.eq("username", username)), project(fields(include("stars"), excludeId()))));
+        for (Document doc : result) {
+            results.add(doc);
+        }
+        int startIndex, endIndex;
+        List<String> resultList = ((List<String>)(results.get(0)).get("stars"));
+        if (page < 1) page = 1;
+        startIndex = ((page - 1) * 9) < resultList.size() ? ((page - 1) * 9) : 0;
+        if (page > 1) {
+        if (page * 9 > resultList.size()) {
+            endIndex = resultList.size();
+        }
+        else {
+            endIndex = page*9;
+        }
+    }
+    else {
+        if(resultList.size() > 9) {
+            endIndex = 9;
+        }
+        else {
+            endIndex = resultList.size();
+        }
+    }
+
+        List<String> sublist = resultList.subList(startIndex, endIndex);
+        results = activitiesHelper(sublist);
+        return results;
+    }
+
 public List<Document> replies(String setname, OtpErlangList keys, OtpErlangList values) throws Exception {
         List<Document> results = new ArrayList<>();
         MongoCollection<Document> collection = mdb.getCollection(setname);

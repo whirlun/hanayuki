@@ -34,7 +34,7 @@ public class MongoTask implements Runnable {
     }
 
     private enum actions {
-        INSERT, REMOVE, FIND, UPDATE, LATESTTHREAD, PREPARECACHE,ACTIVITIES, EXPANDTHREAD,REPLIES;
+        INSERT, REMOVE, FIND, UPDATE, LATESTTHREAD, PREPARECACHE,ACTIVITIES, EXPANDTHREAD,REPLIES,LOVES,STARS;
     }
 
     public void run() {
@@ -67,6 +67,12 @@ public class MongoTask implements Runnable {
                     break;
                 case REPLIES:
                     doReplies();
+                    break;
+                case LOVES:
+                    doLoves();
+                    break;
+                case STARS:
+                    doStars();
                     break;
             }}catch (Exception e){
             OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[] {
@@ -189,6 +195,36 @@ public class MongoTask implements Runnable {
         ArrayList<OtpErlangObject> arrayList = new ArrayList<>();
         List<Document> result;
         result = conn.replies(setname, keys, values);
+        for (Document doc : result) {
+            arrayList.add(java2Erlang(doc));
+        }
+        OtpErlangObject[] erlangArray = new OtpErlangObject[arrayList.size()];
+        arrayList.toArray(erlangArray);
+        OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[]{
+                new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), new OtpErlangList(erlangArray), ref
+        });
+        mbox.send(from, reply);
+    }
+
+        private void doLoves() throws Exception {
+        ArrayList<OtpErlangObject> arrayList = new ArrayList<>();
+        List<Document> result;
+        result = conn.loves(setname, keys, values);
+        for (Document doc : result) {
+            arrayList.add(java2Erlang(doc));
+        }
+        OtpErlangObject[] erlangArray = new OtpErlangObject[arrayList.size()];
+        arrayList.toArray(erlangArray);
+        OtpErlangTuple reply = new OtpErlangTuple(new OtpErlangObject[]{
+                new OtpErlangAtom("reply"), new OtpErlangAtom("ok"), new OtpErlangList(erlangArray), ref
+        });
+        mbox.send(from, reply);
+    }
+
+        private void doStars() throws Exception {
+        ArrayList<OtpErlangObject> arrayList = new ArrayList<>();
+        List<Document> result;
+        result = conn.stars(setname, keys, values);
         for (Document doc : result) {
             arrayList.add(java2Erlang(doc));
         }

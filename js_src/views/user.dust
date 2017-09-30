@@ -173,7 +173,92 @@
                     );
                 }
             })
+        };
+    var loved = function() {
+        var lovecount = {lovecount};
+        if(window.lovenowpage == undefined) {
+            window.lovenowpage = 1;
         }
+        var jsonData = {"page": window.lovenowpage,
+                    "_csrf": "{csrf}"};
+         $.ajax({
+      type: 'POST',
+      contentType: 'application/json',
+      url: '/userhome/{username}/loves',
+      data: JSON.stringify(jsonData),
+      success: function(data) {
+          if($('#thread-data')) {
+              $('#user-detail-data').html(null);
+          }
+          var jsondata = JSON.parse(data);
+          $("#user-detail-data").append("<ul id='thread-data'></ul>");
+            for(var i = 0; i < jsondata['loves'].length; i++) {
+                $("#thread-data").append("<li id='thread"+i+"'></li>");
+                $("#thread"+i).append("<p class='user-thread-title'>"+jsondata['loves'][i]['title']+"</p>");
+                if(jsondata['loves'][i]['lock'] == true) {
+                    $("#thread"+i).append("<span class='glyphicons glyphicons-lock'></span>");
+                }
+                $("#thread"+i).append("<ul class='list-inline user-thread-status'><li><span class='glyphicons glyphicons-eye-open'></span>"+jsondata['loves'][i]['read']+"</li>"+
+                "<li><span class='glyphicons glyphicons-comments'></span>"+jsondata['loves'][i]['reply']+"</li>");
+                $("#thread"+i).append("<p class='thread-content'>"+jsondata['loves'][i]['content'].substr(0,100)+"</p>");
+            }
+            $('#user-detail-data').append("<div class='user-pagination'></div>");
+            var totalpage = Math.ceil(lovecount/9);
+            $('.user-pagination').pagination({
+                totalData: lovecount,
+                showData: 9,
+                current: window.lovenowpage,
+                callback:function(api) {
+                    window.lovenowpage = api.getCurrent();
+                    loved();
+                }
+            });
+            }
+        })
+    };
+
+    var starred = function() {
+        var starcount = {starcount};
+        if(window.starnowpage == undefined) {
+            window.starnowpage = 1;
+        }
+        var jsonData = {"page": window.starnowpage,
+                    "_csrf": "{csrf}"};
+         $.ajax({
+      type: 'POST',
+      contentType: 'application/json',
+      url: '/userhome/{username}/stars',
+      data: JSON.stringify(jsonData),
+      success: function(data) {
+          if($('#thread-data')) {
+              $('#user-detail-data').html(null);
+          }
+          var jsondata = JSON.parse(data);
+          $("#user-detail-data").append("<ul id='thread-data'></ul>");
+            for(var i = 0; i < jsondata['stars'].length; i++) {
+                $("#thread-data").append("<li id='thread"+i+"'></li>");
+                $("#thread"+i).append("<p class='user-thread-title'>"+jsondata['stars'][i]['title']+"</p>");
+                if(jsondata['stars'][i]['lock'] == true) {
+                    $("#thread"+i).append("<span class='glyphicons glyphicons-lock'></span>");
+                }
+                $("#thread"+i).append("<ul class='list-inline user-thread-status'><li><span class='glyphicons glyphicons-eye-open'></span>"+jsondata['stars'][i]['read']+"</li>"+
+                "<li><span class='glyphicons glyphicons-comments'></span>"+jsondata['stars'][i]['reply']+"</li>");
+                $("#thread"+i).append("<p class='thread-content'>"+jsondata['stars'][i]['content'].substr(0,100)+"</p>");
+            }
+            $('#user-detail-data').append("<div class='user-pagination'></div>");
+            var totalpage = Math.ceil(starcount/9);
+            $('.user-pagination').pagination({
+                totalData: starcount,
+                showData: 9,
+                current: window.starnowpage,
+                callback:function(api) {
+                    window.starnowpage = api.getCurrent();
+                    loved();
+                }
+            });
+            }
+        })
+    };
 </script>
 {/userinfo}
 </body>
